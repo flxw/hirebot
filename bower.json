@@ -1,0 +1,15 @@
+{
+  "name": "hirebot",
+  "version": "0.0.0",
+  "authors": [
+    "Felix Wolff <felix.stefan.wolff@gmail.com>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
