@@ -12,11 +12,12 @@ var bodyParser   = require('body-parser')
 var session      = require('express-session')
 
 // external modules
-//var swig         = require('swig')
-//var stylus       = require('stylus')
+var swig         = require('swig')
+var stylus       = require('stylus')
 var config       = require('./config.js');
 var routes       = require('./routes.js')
 var accounting   = require('./accounting.js')
+var path         = require('path')
 
 // set up express
 if (config.debug) app.use(morgan('dev'))
@@ -31,27 +32,18 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // preprocessor setup
-//swig.setDefaults({ cache: false})
-//app.engine('html', swig.renderFile)
-//app.set('view engine', 'html')
-//app.set('view cache', true)
-//app.set('views', __dirname + '/views')
-/*app.use(stylus.middleware({
-  src: __dirname + '/public/css',
-  dest: __dirname + '/public/css',
-  compile : function(str, path) {
-    return stylus(str)
-      .set('filename', path)
-      .set('warn', true)
-      .set('compress', true);
-  }
-}))*/
+swig.setDefaults({ cache: false})
+app.engine('html', swig.renderFile)
+app.set('view engine', 'html')
+app.set('view cache', true)
+app.set('views', __dirname + '/views')
+app.use(stylus.middleware(path.join(__dirname, 'public')))
 app.use(express.static(__dirname + '/public'))
 
 
 // set up ---------------------------------------
 accounting.initialize(passport)
-routes.initialize(app, accounting)
+routes.initialize(app, passport)
 
 // launch ---------------------------------------
 app.listen(config.port);

@@ -1,11 +1,15 @@
-/* Custom Stylesheet */
-/**
- * Use this file to override Materialize files so you can update
- * the core Materialize files in the future
- *
- * Made By MaterializeCSS.com
- */
-
 .icon-block {
   padding: 0 15px;
+}
+.parallax-container {
+  height: 300px !important;
+  line-height: 0;
+  height: auto;
+  color: rgba(255,255,255,0.9);
+}
+.parallax-container .section {
+  width: 100%;
+}
+footer.page-footer {
+  margin-top: 0;
 }

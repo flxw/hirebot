@@ -1,21 +1,27 @@
 'use strict';
 
-exports.initialize = function(app, accounting) {
+var logger = require('winston')
+
+exports.initialize = function(app, passport) {
   app.route('/')
     .get(function(req, res) {
       var file = '404.html'
 
-      if (false /*req.isAuthenticated()*/) {
-        file = 'authorized-index.html'
+      if (req.isAuthenticated()) {
+        if (req.user.is_recruiter) file = 'authorized-recruiter-index'
+        else file = 'authorized-user-index'
       } else {
-        file = 'unauthorized-index.html'
+        file = 'unauthorized-index'
       }
 
-      res.sendFile(file, {root: './public'})
+      res.render(file)
     })
 
-  app.route('/register')
-    .get(accounting.register)
+  app.get('/register', passport.authenticate('github'))
+  app.get('/register/callback', passport.authenticate('github', {
+    successRedirect: '/',
+    failureRedirect: '/'
+  }))
 }
 
 // route middleware to make sure a user is logged in
