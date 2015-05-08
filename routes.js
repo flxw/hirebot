@@ -1,6 +1,7 @@
 'use strict';
 
 var logger = require('winston')
+var api    = require('./api.js')
 
 exports.initialize = function(app, passport) {
   app.route('/')
@@ -11,8 +12,12 @@ exports.initialize = function(app, passport) {
       if (req.isAuthenticated()) {
         data = { user: req.user }
 
-        if (req.user.is_recruiter) file = 'authorized-recruiter-index'
-        else file = 'authorized-user-index'
+        if (req.user.is_recruiter) {
+          file = 'authorized-recruiter-index'
+        } else {
+          file = 'authorized-user-index'
+          data.script = 'user.js'
+        }
       } else {
         file = 'unauthorized-index'
       }
@@ -25,6 +30,8 @@ exports.initialize = function(app, passport) {
     successRedirect: '/',
     failureRedirect: '/'
   }))
+
+  app.get('/api/repositories', api.getRepositories)
 }
 
 // route middleware to make sure a user is logged in
