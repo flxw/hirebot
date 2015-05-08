@@ -31,14 +31,13 @@ exports.initialize = function(p) {
     clientSecret: config.clientSecret,
     callbackURL : config.callbackUrl
   }, function(token, tokenSecret, profile, done) {
-    logger.info('authenticate')
     process.nextTick(function() {
       database.getUserById(profile.id)
         .then(function(user) {
           if (user) {
             return done(null, user)
           } else {
-            acquireUserEmails({id: profile.id, access_token: token})
+            acquireUserEmails({id: profile.id, name: profile._json.name, profileurl: profile.profileUrl, access_token: token})
               .then(database.saveUser)
               .then(function(u) { done(null,u) })
           }
@@ -46,17 +45,6 @@ exports.initialize = function(p) {
         .catch(done)
     })
   }))
-}
-
-exports.register = function(req,res) {
-  var code = req.query.code
-
-  acquireAccessToken(code)
-    .then(acquireBasicUserInfo)
-    .then(acquireUserEmails)
-    .then(database.saveUser)
-    .then(res.send)
-    .catch(function(e) { logger.error(e) })
 }
 
 function acquireUserEmails(u) {
@@ -73,6 +61,7 @@ function acquireUserEmails(u) {
       deferred.reject(error)
     } else {
       u.emails = _.map(body, 'email')
+  console.log(JSON.stringify(u, null, 2))
       deferred.resolve(u)
     }
   })

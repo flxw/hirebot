@@ -6,15 +6,18 @@ exports.initialize = function(app, passport) {
   app.route('/')
     .get(function(req, res) {
       var file = '404.html'
+      var data = {}
 
       if (req.isAuthenticated()) {
+        data = { user: req.user }
+
         if (req.user.is_recruiter) file = 'authorized-recruiter-index'
         else file = 'authorized-user-index'
       } else {
         file = 'unauthorized-index'
       }
 
-      res.render(file)
+      res.render(file, data)
     })
 
   app.get('/register', passport.authenticate('github'))
