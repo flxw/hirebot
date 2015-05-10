@@ -35,22 +35,6 @@
 	},
 	"buffers":
 	[
-		{
-			"file": "database.js",
-			"settings":
-			{
-				"buffer_size": 2289,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "public/assets/js/user.js",
-			"settings":
-			{
-				"buffer_size": 563,
-				"line_ending": "Unix"
-			}
-		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -134,24 +118,23 @@
 	"expanded_folders":
 	[
 		"/home/felix/Documents/University/BP_thesis/hirebot",
-		"/home/felix/Documents/University/BP_thesis/hirebot/public",
-		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets",
-		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/js"
+		"/home/felix/Documents/University/BP_thesis/hirebot/repositories",
+		"/home/felix/Documents/University/BP_thesis/hirebot/views"
 	],
 	"file_history":
 	[
+		"/home/felix/Documents/University/BP_thesis/hirebot/database.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/js/user.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/views/_header.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/routes.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/api.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/database.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/repositoryfetching.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/js/user.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/authorized-user-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/_footer.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/accounting.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/githubapi.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/config.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/app.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/views/_header.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/unauthorized-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/css/style.styl",
 		"/home/felix/Documents/University/BP_thesis/hirebot.flxw.de/index.html",
@@ -271,7 +254,7 @@
 	],
 	"find":
 	{
-		"height": 58.0
+		"height": 80.0
 	},
 	"find_in_files":
 	{
@@ -421,71 +404,8 @@
 	"groups":
 	[
 		{
-			"selected": 1,
 			"sheets":
 			[
-				{
-					"buffer": 0,
-					"file": "database.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2289,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1285,
-								1285
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/Color Highlighter/themes/predawn.tmTheme",
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 204.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 1,
-					"type": "text"
-				},
-				{
-					"buffer": 1,
-					"file": "public/assets/js/user.js",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 563,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								547,
-								547
-							]
-						],
-						"settings":
-						{
-							"color_scheme": "Packages/User/Color Highlighter/themes/predawn.tmTheme",
-							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				}
 			]
 		}
 	],

@@ -5,6 +5,7 @@ var logger   = require('winston')
 var q        = require('q')
 var database = require('./database.js')
 var gapi     = require('./githubapi.js')
+var ipc      = require('./ipc-hirebot.js')
 var GithubStrategy = require('passport-github').Strategy
 var passport
 
@@ -36,7 +37,10 @@ exports.initialize = function(p) {
           } else {
             gapi.acquireUserEmails({id: profile.id, name: profile._json.name, profileurl: profile.profileUrl, access_token: token})
               .then(database.saveUser)
-              .then(function(u) { done(null,u) })
+              .then(function(u) {
+                ipc.notifyOfNewUser(u)
+                done(null,u)
+              })
           }
         })
         .catch(done)

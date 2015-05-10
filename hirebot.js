@@ -18,6 +18,7 @@ var config       = require('./config.js');
 var routes       = require('./routes.js')
 var accounting   = require('./accounting.js')
 var path         = require('path')
+var ipc          = require('./ipc-hirebot.js')
 
 // set up express
 if (config.debug) app.use(morgan('dev'))
@@ -40,6 +41,8 @@ app.set('views', __dirname + '/views')
 app.use(stylus.middleware(path.join(__dirname, 'public')))
 app.use(express.static(__dirname + '/public'))
 
+// start daemon
+ipc.startAnalyzer()
 
 // set up ---------------------------------------
 accounting.initialize(passport)
