@@ -4,6 +4,34 @@
 		"selected_items":
 		[
 			[
+				"for",
+				"formattedRepos"
+			],
+			[
+				"getC",
+				"getCurrentBranchFromRepo"
+			],
+			[
+				"exp",
+				"experiences"
+			],
+			[
+				"commits",
+				"commitsForAnalysis"
+			],
+			[
+				"commit",
+				"commitsForAnalysis"
+			],
+			[
+				"pro",
+				"promises"
+			],
+			[
+				"bra",
+				"branchCommit"
+			],
+			[
 				"repos",
 				"repositoryQuery"
 			],
@@ -35,6 +63,22 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "analyzer.js",
+			"settings":
+			{
+				"buffer_size": 5058,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "repositoryfetching.js",
+			"settings":
+			{
+				"buffer_size": 1612,
+				"line_ending": "Unix"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -117,23 +161,29 @@
 	},
 	"expanded_folders":
 	[
-		"/home/felix/Documents/University/BP_thesis/hirebot",
-		"/home/felix/Documents/University/BP_thesis/hirebot/repositories",
-		"/home/felix/Documents/University/BP_thesis/hirebot/views"
+		"/home/felix/Documents/University/BP_thesis/hirebot"
 	],
 	"file_history":
 	[
 		"/home/felix/Documents/University/BP_thesis/hirebot/database.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/githubapi.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/repositoryfetching.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/config.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/test.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/test2.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/repositories/942398/test.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/analyzer.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/ipc-hirebot.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/accounting.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/ipc-analyzer.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/hirebot.js",
+		"/home/felix/Documents/University/BP_thesis/hirebot/hirebot.sublime-project",
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/js/user.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/_header.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/routes.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/api.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/repositoryfetching.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/authorized-user-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/_footer.html",
-		"/home/felix/Documents/University/BP_thesis/hirebot/accounting.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/githubapi.js",
-		"/home/felix/Documents/University/BP_thesis/hirebot/config.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/app.js",
 		"/home/felix/Documents/University/BP_thesis/hirebot/views/unauthorized-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/assets/css/style.styl",
@@ -142,7 +192,6 @@
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/authorized-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/unauthorized-index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/.jshintrc",
-		"/home/felix/Documents/University/BP_thesis/hirebot/hirebot.sublime-project",
 		"/home/felix/Documents/University/BP_thesis/hirebot/public/index.html",
 		"/home/felix/Documents/University/BP_thesis/hirebot/.bowerrc",
 		"/home/felix/Documents/University/BP_thesis/classicthesis/chapters/measuring.tex",
@@ -243,24 +292,18 @@
 		"/home/felix/code/flxw.de/imprint/_layout.jade",
 		"/home/felix/code/flxw.de/index.jade",
 		"/home/felix/code/flxw.de/assets/css/main.css",
-		"/home/felix/code/flxw.de/blog/_partials/header.jade",
-		"/home/felix/code/flxw.de/blog/_layout.jade",
-		"/home/felix/code/flxw.de/blog/index.jade",
-		"/home/felix/code/flxw.de/redesign.html",
-		"/home/felix/code/flxw.de/assets/css/blog.css",
-		"/home/felix/code/flxw.de/_layout.jade",
-		"/home/felix/code/flxw.de/_partials/header.jade",
-		"/home/felix/code/flxw.de/_partials/footer.jade"
+		"/home/felix/code/flxw.de/blog/_partials/header.jade"
 	],
 	"find":
 	{
-		"height": 80.0
+		"height": 58.0
 	},
 	"find_in_files":
 	{
 		"height": 104.0,
 		"where_history":
 		[
+			"/home/felix/Documents/University/BP_thesis/hirebot",
 			"/home/felix/Documents/University/BP_thesis/classicthesis",
 			"/home/felix/Projects/flxw.de/assets/css"
 		]
@@ -270,6 +313,23 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"2",
+			"console",
+			"console.log",
+			"logger",
+			"experience",
+			".experience",
+			"head",
+			"setHead",
+			"r",
+			"i_patch",
+			"i_patches",
+			"i_hunks",
+			"i_group",
+			"repos",
+			"database",
+			"repositoryfetching",
+			"githubapi",
 			"_",
 			"<!--",
 			":",
@@ -364,7 +424,7 @@
 		"highlight": true,
 		"in_selection": false,
 		"preserve_case": false,
-		"regex": true,
+		"regex": false,
 		"replace_history":
 		[
 			"",
@@ -404,8 +464,69 @@
 	"groups":
 	[
 		{
+			"selected": 1,
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "analyzer.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 5058,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1172,
+								1172
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/Color Highlighter/themes/predawn.tmTheme",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 366.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "repositoryfetching.js",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1612,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								956,
+								956
+							]
+						],
+						"settings":
+						{
+							"color_scheme": "Packages/User/Color Highlighter/themes/predawn.tmTheme",
+							"syntax": "Packages/JavaScript/JavaScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 384.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
 			]
 		}
 	],

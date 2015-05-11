@@ -10,6 +10,7 @@ var _ = require('lodash')
 var path = require('path')
 
 exports.fetchNew = function(user) {
+  var d = q.defer()
   var promises = [
     gapi.acquireUserRepositories(user),
     database.getRepositoriesFrom(user.id)
@@ -18,6 +19,9 @@ exports.fetchNew = function(user) {
   q.all(promises)
    .then(deselectKnownRepositories)
    .then(processNewRepositories)
+   .then(d.resolve)
+
+ return d.promise
 }
 
 function deselectKnownRepositories(repos) {
@@ -36,18 +40,22 @@ function deselectKnownRepositories(repos) {
 function processNewRepositories(repos) {
   var deferred = q.defer()
   var promises = []
+  var formattedRepos = []
 
-  for (var i = 1, j = repos.length - 1; i <= 1; i++) {
-    promises.push(processSingleRepository(repos[i]))
-    promises.push(database.addRepository({
+  for (var i = 0, j = repos.length - 1; i <= j; i++) {
+    var fr = {
       userid: repos[i].owner.id,
       name: repos[i].name,
       url: repos[i].html_url,
-    }))
+    }
+
+    promises.push(processSingleRepository(repos[i]))
+    promises.push(database.addRepository(fr))
+    formattedRepos.push(fr)
   }
 
   q.all(promises)
-   .then(deferred.resolve)
+   .then(function() { deferred.resolve(formattedRepos) })
    .catch(logger.error)
 
   return deferred.promise
@@ -56,21 +64,10 @@ function processNewRepositories(repos) {
 function processSingleRepository(repo) {
   var d = q.defer()
   var where = path.join(config.repositoryFolder, String(repo.owner.id), repo.name)
-try{
+
   git.Clone(repo.clone_url, where)
-    .then(function(repoHandle) {
-      repoHandle.getMasterCommit()
-        .then(function(c) {
-          database.updateRepositoryHead({
-            name: repo.name,
-            userid: repo.owner.id,
-            head: c.sha()
-          })
-        })
-        .catch(logger.error)
-    })
     .then(d.resolve)
     .catch(d.reject)
-}catch(e){logger.error(e)}
+
   return d.promise
 }

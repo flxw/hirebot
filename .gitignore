@@ -2,3 +2,4 @@ public/assets/libs
 node_modules
 *.db
 repositories
+test*.js
