@@ -13,14 +13,17 @@ var _              = require('lodash')
 process.on('message', function(m) {
   switch(m.type) {
     case 'newUser':
-      repositories.fetchNew(m.user)
-        .then(analyzeRepositories)
+      repositories.fetchNew(m.user).then(analyzeRepositories)
+      break;
   }
 })
+
+refreshAnalysis()
 
 // --- analyzer logic ---------------------------
 
 function analyzeRepositories(repos) {
+  var d = q.defer()
   var promises = []
 
   for (var i = repos.length - 1; i >= 0; i--) {
@@ -29,14 +32,17 @@ function analyzeRepositories(repos) {
 
   q.all(promises).then(function() {
     console.log('analyzed all repositories for', repos[0].userid)
+    d.resolve()
   })
+
+  return d.promise
 }
 
 function analyzeRepository(repo) {
   var d = q.defer()
 
   ng.Repository.open(path.resolve(__dirname, config.repositoryFolder, String(repo.userid), repo.name))
-    .then(function(r) { return { rep: r, uid: repo.userid } })
+    .then(function(r) { return { rep: r, uid: repo.userid, stopcommit: repo.last_analyzed_commit } })
     .then(gatherDataForAnalysis)
     .then(collectCommitsForAnalysis)
     .then(collectDiffs)
@@ -46,7 +52,7 @@ function analyzeRepository(repo) {
     })
     .catch(console.log)
     .done(function() {
-      console.log('finished initial analysis of repo', repo.name, 'from', repo.userid)
+      console.log('finished analysis of repo', repo.name, 'from', repo.userid)
       d.resolve()
     })
 
@@ -70,7 +76,8 @@ function gatherDataForAnalysis(u) {
   q.all(promises).then(function() {
     return d.resolve({
       mails: _.map(promises[0], 'email'),
-      commit: promises[1]
+      commit: promises[1],
+      stopcommit: u.stopcommit
     })
   }).catch(d.reject)
 
@@ -85,6 +92,8 @@ function collectCommitsForAnalysis(selectorData) {
   // TODO use single object emitting event
   history.on('end', function(commits) {
     for (var i = 0, j = commits.length - 1; i <= j; i++) {
+      if (commits[i].id().tostrS() === selectorData.stopcommit) break
+
       if (_.includes(selectorData.mails, commits[i].author().email())) {
         commitsForAnalysis.push(commits[i])
       }
@@ -208,3 +217,50 @@ function saveExperiences(exp, userid, reponame) {
 
   return d.promise
 }
+
+function updateRepositories(repositories) {
+  var d = q.defer(), promises = []
+
+  for (var i = repositories.length - 1; i >= 0; i--) {
+    promises.push(updateRepository(repositories[i]))
+  }
+
+  q.allSettled(promises).then(function() {
+    console.log('pulled all repositories!')
+    d.resolve(repositories)
+  })
+
+  return d.promise
+}
+
+function updateRepository(r) {
+  var d = q.defer(), gitRepo
+try{
+  ng.Repository.open(path.resolve(__dirname, config.repositoryFolder, String(r.userid), r.name))
+    .then(function(gr) {
+      gitRepo = gr
+      return gitRepo.fetchAll({
+        credentials: function(url, userName) {
+          return ng.Cred.sshKeyFromAgent(userName)
+        },
+        certificateCheck: function() {
+          return 1;
+        }
+      })
+    })
+    .then(function() { return gitRepo.mergeBranches('master', 'origin/master') })
+    .then(d.resolve)
+} catch(e) {console.error(e)}
+
+  return d.promise
+}
+
+function refreshAnalysis() {
+  database.getRepositoriesForAnalysis()
+    .then(updateRepositories)
+    .then(analyzeRepositories)
+    .finally(function() {
+      console.log('scheduling analysis for in one hour')
+      setTimeout(refreshAnalysis, 360000)
+    })
+ }

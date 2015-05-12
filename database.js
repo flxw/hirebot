@@ -20,6 +20,7 @@ var repositoryQuery = 'SELECT * FROM repositories WHERE userid = ?'
 var setLastAnalyzedCommit  = 'UPDATE repositories SET last_analyzed_commit = ?, lastcheck = CURRENT_TIMESTAMP WHERE userid = ? AND name = ?'
 var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
+var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -99,5 +100,14 @@ exports.getUserMailAddresses = function(uid) {
     else d.resolve(rows)
   })
 
+  return d.promise
+}
+
+exports.getRepositoriesForAnalysis = function() {
+  var d = q.defer()
+  db.all(analysisRepoQuery, function(e,r) {
+    if (e) d.reject(e)
+    else d.resolve(r)
+  })
   return d.promise
 }
