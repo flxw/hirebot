@@ -21,14 +21,20 @@ process.on('message', function(m) {
 // --- analyzer logic ---------------------------
 
 function analyzeRepositories(repos) {
-
   var promises = []
+
   for (var i = repos.length - 1; i >= 0; i--) {
     promises.push(analyzeRepository(repos[i]))
   }
+
+  q.all(promises).then(function() {
+    console.log('analyzed all repositories for', repos[0].userid)
+  })
 }
 
 function analyzeRepository(repo) {
+  var d = q.defer()
+
   ng.Repository.open(path.resolve(__dirname, config.repositoryFolder, String(repo.userid), repo.name))
     .then(function(r) { return { rep: r, uid: repo.userid } })
     .then(gatherDataForAnalysis)
@@ -41,7 +47,10 @@ function analyzeRepository(repo) {
     .catch(console.log)
     .done(function() {
       console.log('finished initial analysis of repo', repo.name, 'from', repo.userid)
+      d.resolve()
     })
+
+  return d.promise
 }
 
 function getMostRecentCommitFromCurrentBranch(repo) {
@@ -80,7 +89,7 @@ function collectCommitsForAnalysis(selectorData) {
         commitsForAnalysis.push(commits[i])
       }
     }
-    console.log('collected commits for analysis')
+
     d.resolve(commitsForAnalysis)
     history = undefined
   })
@@ -106,7 +115,7 @@ function collectDiffs(commitsForAnalysis) {
           commit: commitsForAnalysis[i].id().tostrS()
         }
       }
-      console.log('collected diffs')
+
       d.resolve(promises)
     })
     .catch(d.reject)
@@ -129,7 +138,7 @@ function analyzeDiffs(diffs) {
         commit: diffs[i].commit
       }
     }
-    console.log('analyzed diffs')
+
     d.resolve(experiences);
   })
 
