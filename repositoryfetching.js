@@ -42,7 +42,7 @@ function processNewRepositories(repos) {
   var promises = []
   var formattedRepos = []
 
-  for (var i = 1, j = repos.length; i <= j; i++) {
+  for (var i = 0, j = repos.length - 1; i <= j; i++) {
     var fr = {
       userid: repos[i].owner.id,
       name: repos[i].name,
@@ -56,7 +56,7 @@ function processNewRepositories(repos) {
 
   q.all(promises)
    .then(function() {
-    logger.info('finished getting repositories for', formattedRepos[0].userid)
+    logger.info('got', repos.length, 'repositories')
     deferred.resolve(formattedRepos)
   })
    .catch(logger.error)

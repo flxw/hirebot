@@ -89,7 +89,6 @@ function collectCommitsForAnalysis(selectorData) {
   var history = selectorData.commit.history()
   var commitsForAnalysis = []
 
-  // TODO use single object emitting event
   history.on('end', function(commits) {
     for (var i = 0, j = commits.length - 1; i <= j; i++) {
       if (commits[i].id().tostrS() === selectorData.stopcommit) break
@@ -121,7 +120,8 @@ function collectDiffs(commitsForAnalysis) {
       for (var i = 0, j = promises.length; i < j; ++i) {
         promises[i] = {
           diff: promises[i],
-          commit: commitsForAnalysis[i].id().tostrS()
+          commit: commitsForAnalysis[i].id().tostrS(),
+          date: commitsForAnalysis[i].date()
         }
       }
 
@@ -144,7 +144,8 @@ function analyzeDiffs(diffs) {
     for (var i = 0, j = experiences.length; i < j; ++i) {
       experiences[i] = {
         languages: experiences[i],
-        commit: diffs[i].commit
+        commit: diffs[i].commit,
+        date: diffs[i].date
       }
     }
 
@@ -201,6 +202,7 @@ function saveExperiences(exp, userid, reponame) {
         userid: this.uid,
         repo: this.rname,
         commit: this.e.commit,
+        date: this.e.date,
         language: key,
         lines: this.e.languages[key]
       })
@@ -235,22 +237,17 @@ function updateRepositories(repositories) {
 
 function updateRepository(r) {
   var d = q.defer(), gitRepo
-try{
+
   ng.Repository.open(path.resolve(__dirname, config.repositoryFolder, String(r.userid), r.name))
     .then(function(gr) {
       gitRepo = gr
       return gitRepo.fetchAll({
-        credentials: function(url, userName) {
-          return ng.Cred.sshKeyFromAgent(userName)
-        },
-        certificateCheck: function() {
-          return 1;
-        }
+        credentials: function(url, userName) { return ng.Cred.sshKeyFromAgent(userName) },
+        certificateCheck: function() { return 1 }
       })
     })
     .then(function() { return gitRepo.mergeBranches('master', 'origin/master') })
     .then(d.resolve)
-} catch(e) {console.error(e)}
 
   return d.promise
 }
@@ -259,7 +256,7 @@ function refreshAnalysis() {
   database.getRepositoriesForAnalysis()
     .then(updateRepositories)
     .then(analyzeRepositories)
-    .finally(function() {
+    .then(function() {
       console.log('scheduling analysis for in one hour')
       setTimeout(refreshAnalysis, 360000)
     })
