@@ -56,7 +56,7 @@ function processNewRepositories(repos) {
 
   q.all(promises)
    .then(function() {
-          logger.info('cloned', repos.length, 'repositories')
+    logger.info('cloned', repos.length, 'repositories')
     deferred.resolve(formattedRepos)
   })
    .catch(logger.error)
