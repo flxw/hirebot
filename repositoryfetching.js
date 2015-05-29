@@ -46,7 +46,7 @@ function processNewRepositories(repos) {
     var fr = {
       userid: repos[i].owner.id,
       name: repos[i].name,
-      url: repos[i].html_url,
+        url: repos[i].html_url
     }
 
     promises.push(processSingleRepository(repos[i]))
@@ -56,7 +56,7 @@ function processNewRepositories(repos) {
 
   q.all(promises)
    .then(function() {
-    logger.info('got', repos.length, 'repositories')
+          logger.info('cloned', repos.length, 'repositories')
     deferred.resolve(formattedRepos)
   })
    .catch(logger.error)

@@ -6,35 +6,72 @@ var q       = require('q')
 var logger  = require('winston')
 
 db.serialize(function() {
-  db.run('CREATE TABLE IF NOT EXISTS users(id INTEGER NOT NULL, access_token VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL DEFAULT "", profileurl VARCHAR(255) NOT NULL DEFAULT "", is_recruiter BOOLEAN NOT NULL, is_valid BOOLEAN NOT NULL, PRIMARY KEY(id))');
-  db.run('CREATE TABLE IF NOT EXISTS useremails(userid INTEGER NOT NULL, email VARCHAR(255) NOT NULL, FOREIGN KEY(userid) REFERENCES users(id))')
-  db.run('CREATE TABLE IF NOT EXISTS repositories(userid INTEGER NOT NULL, name VARCHAR(255) NOT NULL DEFAULT "", url VARCHAR(255) NOT NULL, lastcheck DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, last_analyzed_commit VARCHAR(255), FOREIGN KEY(userid) REFERENCES users(id))')
-  db.run('CREATE TABLE IF NOT EXISTS statistics(userid INTEGER NOT NULL, reponame VARCHAR(255) NOT NULL, commitid VARCHAR(255) NOT NULL, language VARCHAR(255) NOT NULL, lines INTEGER NOT NULL, FOREIGN KEY(userid) REFERENCES users(id))')
+    db.run('CREATE TABLE IF NOT EXISTS users(' +
+    'id INTEGER NOT NULL,' +
+    'access_token VARCHAR(255) NOT NULL,' +
+    'name VARCHAR(255) NOT NULL DEFAULT "",' +
+    'profileurl VARCHAR(255) NOT NULL DEFAULT "",' +
+    'avatarurl VARCHAR(255) NOT NULL DEFAULT "http://placehold.it/250x300",' +
+    'location VARCHAR(255),' +
+    'bio VARCHAR(255),' +
+    'hireable BOOLEAN NOT NULL,' +
+    'followers INTEGER NOT NULL,' +
+    'following INTEGER NOT NULL,' +
+    'is_recruiter BOOLEAN NOT NULL,' +
+    'is_valid BOOLEAN NOT NULL,' +
+    'PRIMARY KEY(id))');
+
+    db.run('CREATE TABLE IF NOT EXISTS useremails(' +
+    'userid INTEGER NOT NULL,' +
+    'email VARCHAR(255) NOT NULL,' +
+    'FOREIGN KEY(userid) REFERENCES users(id))')
+
+    db.run('CREATE TABLE IF NOT EXISTS repositories(' +
+    'userid INTEGER NOT NULL,' +
+    'name VARCHAR(255) NOT NULL DEFAULT "",' +
+    'url VARCHAR(255) NOT NULL, ' +
+    'lastcheck DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
+    'last_analyzed_commit VARCHAR(255),' +
+    'FOREIGN KEY(userid) REFERENCES users(id))')
+
+    db.run('CREATE TABLE IF NOT EXISTS statistics(' +
+    'userid INTEGER NOT NULL,' +
+    'reponame VARCHAR(255) NOT NULL,' +
+    'commitid VARCHAR(255) NOT NULL,' +
+    'date DATETIME NOT NULL,' +
+    'language VARCHAR(255) NOT NULL,' +
+    'lines INTEGER NOT NULL,' +
+    'FOREIGN KEY(userid) REFERENCES users(id))')
 })
 
-var newUserQuery = 'INSERT OR REPLACE INTO users(id,access_token, name, profileurl, is_recruiter, is_valid) VALUES(?,?,?,?,?,?)'
+var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
 var newMailQuery = 'INSERT OR REPLACE INTO useremails(userid,email) VALUES(?,?)'
 var userQuery    = 'SELECT * FROM users WHERE id = ?'
 var newRepoQuery = 'INSERT INTO repositories(userid, name, url) VALUES(?,?,?)'
 var repositoryQuery = 'SELECT * FROM repositories WHERE userid = ?'
 var setLastAnalyzedCommit  = 'UPDATE repositories SET last_analyzed_commit = ?, lastcheck = CURRENT_TIMESTAMP WHERE userid = ? AND name = ?'
-var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?)'
+var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
-var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0'
+var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
 
 exports.saveUser = function(user) {
-  var deferred = q.defer()
+    var deferred = q.defer()
 
-  db.run(newUserQuery, user.id, user.access_token, user.name, user.profileurl, false, true, function(error) {
-    if (error) deferred.reject(error)
-    else deferred.resolve(user)
-  })
+    if (!user.avatar_url) user.avatar_url = "http://placehold.it/250x300"
 
-  for (var i = user.emails.length - 1; i >= 0; i--) {
-    db.run(newMailQuery, user.id, user.emails[i])
-  }
+    db.run(newUserQuery, user.id, user.access_token, user.name, user.profileurl, user.avatar_url, user.location, user.bio,
+        user.hireable, user.followers, user.following, false, true,
+        function (error) {
+            if (error) deferred.reject(error)
+            else deferred.resolve(user)
+        }
+    )
 
-  return deferred.promise
+    for (var i = user.emails.length - 1; i >= 0; i--) {
+        db.run(newMailQuery, user.id, user.emails[i])
+    }
+
+    return deferred.promise
 }
 
 exports.getUserById = function(id) {
@@ -73,7 +110,7 @@ exports.setLastAnalyzedCommit = function(repo) {
 exports.addExperience = function(experience) {
   var d = q.defer()
 
-  db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.language, experience.lines, function(error) {
+    db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date, experience.language, experience.lines, function (error) {
     if (error) d.reject(error)
     else d.resolve()
   })

@@ -35,7 +35,11 @@ exports.initialize = function(p) {
           if (user) {
             return done(null, user)
           } else {
-            gapi.acquireUserEmails({id: profile.id, name: profile._json.name, profileurl: profile.profileUrl, access_token: token})
+              var userData = profile._json
+              userData.id = profile.id
+              userData.access_token = token
+
+              gapi.acquireUserEmails(userData)
               .then(database.saveUser)
               .then(function(u) {
                 ipc.notifyOfNewUser(u)

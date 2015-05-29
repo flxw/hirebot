@@ -17,8 +17,12 @@ process.on('message', function(m) {
       break;
   }
 })
-
+//repositories.fetchNew({id:942398, access_token: '4ccc1d4530a2f9a9b9a1627a803fbc0c48b39074'}).then(analyzeRepositories)
 refreshAnalysis()
+
+function log() {
+    console.log('analyzer:', arguments)
+}
 
 // --- analyzer logic ---------------------------
 
@@ -26,20 +30,24 @@ function analyzeRepositories(repos) {
   var d = q.defer()
   var promises = []
 
-  for (var i = repos.length - 1; i >= 0; i--) {
+    for (var i = repos.length - 1; i > 0; i--) {
     promises.push(analyzeRepository(repos[i]))
   }
 
   q.all(promises).then(function() {
-    console.log('analyzed all repositories for', repos[0].userid)
+      if (repos.length) console.log('analyzed all repositories for', repos[0].userid)
+      else console.log('analyzed zero repositories because there were none')
+
     d.resolve()
-  })
+  }).catch(console.error)
 
   return d.promise
 }
 
 function analyzeRepository(repo) {
   var d = q.defer()
+
+    log('started analysis of repo', repo.name)
 
   ng.Repository.open(path.resolve(__dirname, config.repositoryFolder, String(repo.userid), repo.name))
     .then(function(r) { return { rep: r, uid: repo.userid, stopcommit: repo.last_analyzed_commit } })
