@@ -110,7 +110,7 @@ exports.setLastAnalyzedCommit = function(repo) {
 exports.addExperience = function(experience) {
   var d = q.defer()
 
-    db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date, experience.language, experience.lines, function (error) {
+    db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date.toISOString(), experience.language, experience.lines, function (error) {
     if (error) d.reject(error)
     else d.resolve()
   })
