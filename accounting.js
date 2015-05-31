@@ -7,6 +7,8 @@ var database = require('./database.js')
 var gapi     = require('./githubapi.js')
 var ipc      = require('./ipc-hirebot.js')
 var GithubStrategy = require('passport-github').Strategy
+var request  = require('request')
+var _ = require('lodash')
 var passport
 
 exports.initialize = function(p) {
@@ -35,13 +37,14 @@ exports.initialize = function(p) {
           if (user) {
             return done(null, user)
           } else {
-              var userData = profile._json
-              userData.id = profile.id
-              userData.access_token = token
+            var userData = profile._json
+            userData.id = profile.id
+            userData.access_token = token
 
-              gapi.acquireUserEmails(userData)
+            gapi.acquireUserEmails(userData)
               .then(database.saveUser)
               .then(function(u) {
+                putUserIntoMailchimpList(u)
                 ipc.notifyOfNewUser(u)
                 done(null,u)
               })
@@ -50,4 +53,20 @@ exports.initialize = function(p) {
         .catch(done)
     })
   }))
+}
+
+function putUserIntoMailchimpList(user) {
+  var primaryMail = _.find(user.emails, { primary: true }).email
+  var auth = 'Basic ' + 'Zmx4dzpkNDRiYmE1ZTFiMzVhYzc1MTM1NTlhOTIxZjZjMDEzZC11czEw'
+
+  request.post({
+    url: 'https://us10.api.mailchimp.com/3.0/lists/d43dd84ce4/members',
+    headers: {
+      Authorization: auth
+    },
+    json: {
+      email_address: primaryMail,
+      status: 'subscribed'
+    }
+  })
 }

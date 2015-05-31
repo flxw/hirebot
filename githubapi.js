@@ -14,7 +14,7 @@ exports.acquireUserEmails = function(u) {
     json: true,
     headers: { 'User-Agent': 'hirebot-alpha' }
   }, function(body) {
-      u.emails = _.map(body, 'email')
+      u.emails = body
       deferred.resolve(u)
   })
 

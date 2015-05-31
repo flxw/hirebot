@@ -24,6 +24,8 @@ db.serialize(function() {
     db.run('CREATE TABLE IF NOT EXISTS useremails(' +
     'userid INTEGER NOT NULL,' +
     'email VARCHAR(255) NOT NULL,' +
+    'prime BOOLEAN NOT NULL,' +
+    'verified BOOLEAN NOT NULL,' +
     'FOREIGN KEY(userid) REFERENCES users(id))')
 
     db.run('CREATE TABLE IF NOT EXISTS repositories(' +
@@ -45,7 +47,7 @@ db.serialize(function() {
 })
 
 var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
-var newMailQuery = 'INSERT OR REPLACE INTO useremails(userid,email) VALUES(?,?)'
+var newMailQuery = 'INSERT OR REPLACE INTO useremails VALUES(?,?,?,?)'
 var userQuery    = 'SELECT * FROM users WHERE id = ?'
 var newRepoQuery = 'INSERT INTO repositories(userid, name, url) VALUES(?,?,?)'
 var repositoryQuery = 'SELECT * FROM repositories WHERE userid = ?'
@@ -55,23 +57,24 @@ var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
 var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
 
 exports.saveUser = function(user) {
-    var deferred = q.defer()
+  var deferred = q.defer()
 
-    if (!user.avatar_url) user.avatar_url = "http://placehold.it/250x300"
+  if (!user.avatar_url) user.avatar_url = "http://placehold.it/250x300"
 
-    db.run(newUserQuery, user.id, user.access_token, user.name, user.profileurl, user.avatar_url, user.location, user.bio,
-        user.hireable, user.followers, user.following, false, true,
-        function (error) {
-            if (error) deferred.reject(error)
-            else deferred.resolve(user)
-        }
-    )
-
-    for (var i = user.emails.length - 1; i >= 0; i--) {
-        db.run(newMailQuery, user.id, user.emails[i])
+  db.run(newUserQuery, user.id, user.access_token, user.name, user.profileurl, user.avatar_url, user.location, user.bio,
+    user.hireable, user.followers, user.following, false, true,
+    function (error) {
+      if (error) deferred.reject(error)
+      else deferred.resolve(user)
     }
+  )
 
-    return deferred.promise
+  for (var i = user.emails.length - 1; i >= 0; i--) {
+    var mail = user.emails[i]
+    db.run(newMailQuery, user.id, mail.email, mail.primary, mail.verified)
+  }
+
+  return deferred.promise
 }
 
 exports.getUserById = function(id) {
