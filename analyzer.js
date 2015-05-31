@@ -199,6 +199,9 @@ function analyzeDiff(diffGroup) {
   return deferred.promise
 }
 
+// NOTE if experiences seem to be missing,
+// check that the email with which the commit
+// was made, is actually listed on github
 function saveExperiences(exp, userid, reponame) {
   var d  = q.defer()
 
