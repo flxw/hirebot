@@ -239,7 +239,7 @@ function updateRepositories(repositories) {
   q.allSettled(promises).then(function(results) {
     log('pulled all repositories!')
     d.resolve(repositories)
-  }).catch(console.log)
+  }).catch(log)
 
   return d.promise
 }
