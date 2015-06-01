@@ -8,7 +8,10 @@ var languagedetect = require('language-detect')
 var database       = require('./database.js')
 var config         = require('./config.js')
 var _              = require('lodash')
+var winston        = require('winston')
 
+winston.remove(winston.transports.Console)
+winston.add(winston.transports.Console, {timestamp:true, colorize:true})
 
 process.on('message', function(m) {
   switch(m.type) {
@@ -21,7 +24,7 @@ process.on('message', function(m) {
 refreshAnalysis()
 
 function log() {
-  console.log('analyzer:', _.map(arguments).join(' '))
+  winston.info('analyzer', _.map(arguments).join(' '))
 }
 
 // --- analyzer logic ---------------------------
