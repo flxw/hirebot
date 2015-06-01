@@ -11,21 +11,12 @@
 <body>
   {% include "./_header.html" %}
 
-  <div class="section no-pad-bot" id="index-banner">
-    <br><br>
-    <div class="container">
-      <h1 class="header center teal-text text-accent-4"><i class="mdi-action-done-all"></i> All set up!</h1>
-    </div>
-    <br><br>
-  </div>
-
-
   <div class="container">
     <div class="section">
       <div class="row">
         <div class="col s12 m4">
           <div class="icon-block">
-            <h2 class="center teal-text text-accent-4"><i class="mdi-hardware-memory"></i></h2>
+            <h2 class="center light-blue-text"><i class="mdi-action-done"></i></h2>
             <h5 class="center">Thank you so much!</h5>
 
             <p class="light">
@@ -33,12 +24,24 @@
               We'll let you know when further developments have taken place.
             </p>
           </div>
+
+          <div class="icon-block">
+            <h2 class="center light-blue-text"><i class="mdi-action-info-outline"></i></h2>
+            <h5 class="center">A short notice</h5>
+
+            <p class="light">
+              We will analyze your commits and run some statistics over your code.
+              We can only analyze what you provide us with - so please make sure
+              that your all e-mail addresses that you have ever used are listed in your
+              GitHub account
+            </p>
+          </div>
         </div>
 
         <div class="col s12 m8">
            <ul id="repo-collection" class="collection with-header">
             <li class="collection-header">
-              <h4>Tracked repositories <a id='refresh-repos' class="right"><i class="mdi-navigation-refresh"></i></a></h4>
+              <h5>Tracked repositories <a id='refresh-repos'><i class="mdi-navigation-refresh"></i></a></h5>
             </li>
             {% for repo in repos %}
               <li class="repo collection-item">Alvin</li>
