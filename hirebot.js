@@ -10,6 +10,7 @@ var morgan       = require('morgan')
 var cookieParser = require('cookie-parser')
 var bodyParser   = require('body-parser')
 var session      = require('express-session')
+var compression  = require('compression')
 
 // external modules
 var swig         = require('swig')
@@ -40,6 +41,7 @@ app.set('view cache', true)
 app.set('views', __dirname + '/views')
 app.use(stylus.middleware(path.join(__dirname, 'public')))
 app.use(express.static(__dirname + '/public'))
+app.use(compression())
 
 // start daemon
 ipc.startAnalyzer()
