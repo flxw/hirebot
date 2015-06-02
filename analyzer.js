@@ -38,7 +38,7 @@ function analyzeRepositories(repos) {
   }
 
   q.all(promises).then(function() {
-    if (repos.length) log('analyzed all repositories for', repos[0].userid)
+    if (repos.length) log('analyzed all repositories for', _.uniq(_.map(repos, 'userid'))) // TODO collect all user IDs here
     else log('analyzed zero repositories because there were none')
 
     d.resolve()
