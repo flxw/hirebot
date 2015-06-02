@@ -266,12 +266,24 @@ function updateRepository(r) {
 }
 
 function refreshAnalysis() {
-  database.getRepositoriesForAnalysis()
-    .then(updateRepositories)
-    .then(analyzeRepositories)
-    .then(function() {
-      log('scheduling analysis for in one hour')
-      setTimeout(refreshAnalysis, 3600000)
-    })
-    .catch(log)
- }
+  database.getAllDevelopers()
+    .then(function(developers) {
+      var promises = []
+
+      // collect newly created repositories and analyze
+      for (var i = developers.length-1; i >= 0; --i) {
+        promises.push(repositories.fetchNew(developers[i]).then(analyzeRepositories))
+      }
+
+      // analyze the old ones
+      q.allSettled(promises)
+        .then(database.getRepositoriesForAnalysis)
+        .then(updateRepositories)
+        .then(analyzeRepositories)
+        .progress(log)
+        .catch(log)
+        .done(function() {
+          log('scheduling analysis for in one hour')
+          setTimeout(refreshAnalysis, 3600000)
+        })
+    })}

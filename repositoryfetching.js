@@ -20,6 +20,7 @@ exports.fetchNew = function(user) {
    .then(deselectKnownRepositories)
    .then(processNewRepositories)
    .then(d.resolve)
+   .catch(d.reject)
 
  return d.promise
 }
@@ -28,13 +29,11 @@ function deselectKnownRepositories(repos) {
   var allRepos   = repos[0]
   var knownRepos = _.map(repos[1], 'name')
 
-  for (var i = allRepos.length - 1; i >= 0; i--) {
-    if (allRepos[i].name in knownRepos) {
-      delete allRepos[i]
-    }
-  }
+  var r = _.filter(allRepos, function(rp) {
+    return !_.contains(knownRepos, rp.name)
+  })
 
-  return allRepos
+  return r
 }
 
 function processNewRepositories(repos) {
@@ -46,7 +45,7 @@ function processNewRepositories(repos) {
     var fr = {
       userid: repos[i].owner.id,
       name: repos[i].name,
-        url: repos[i].html_url
+      url: repos[i].html_url
     }
 
     promises.push(processSingleRepository(repos[i]))
@@ -56,10 +55,13 @@ function processNewRepositories(repos) {
 
   q.all(promises)
    .then(function() {
-    logger.info('cloned', repos.length, 'repositories')
-    deferred.resolve(formattedRepos)
-  })
-   .catch(logger.error)
+     logger.info('cloned', repos.length, 'repositories')
+     deferred.resolve(formattedRepos)
+   })
+   .catch(function(e) {
+     debugger;
+     logger.error(e)
+   })
 
   return deferred.promise
 }

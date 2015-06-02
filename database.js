@@ -43,6 +43,7 @@ db.serialize(function() {
     'date DATETIME NOT NULL,' +
     'language VARCHAR(255) NOT NULL,' +
     'lines INTEGER NOT NULL,' +
+    'PRIMARY KEY(userid,reponame,commitid,language),' +
     'FOREIGN KEY(userid) REFERENCES users(id))')
 })
 
@@ -55,6 +56,7 @@ var setLastAnalyzedCommit  = 'UPDATE repositories SET last_analyzed_commit = ?, 
 var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
 var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
+var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -146,6 +148,15 @@ exports.getUserMailAddresses = function(uid) {
 exports.getRepositoriesForAnalysis = function() {
   var d = q.defer()
   db.all(analysisRepoQuery, function(e,r) {
+    if (e) d.reject(e)
+    else d.resolve(r)
+  })
+  return d.promise
+}
+
+exports.getAllDevelopers = function() {
+  var d = q.defer()
+  db.all(allDeveloperQuery, function(e,r) {
     if (e) d.reject(e)
     else d.resolve(r)
   })
