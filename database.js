@@ -115,13 +115,15 @@ exports.setLastAnalyzedCommit = function(repo) {
 exports.addExperienceBulk = function(experiences) {
   var d = q.defer()
 
-  db.run("BEGIN TRANSACTION")
-  experiences.forEach(function(experience) {
-    db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date.toISOString(), experience.language, experience.lines)
-  })
-  db.run("END", function(e,r) {
-    if (e) d.reject(e)
-    else d.resolve()
+  db.serialize(function() {
+    db.run("BEGIN TRANSACTION")
+    experiences.forEach(function (experience) {
+      db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date.toISOString(), experience.language, experience.lines)
+    })
+    db.run("END TRANSACTION", function (e, r) {
+      if (e) d.reject(e)
+      else d.resolve()
+    })
   })
 
   return d.promise

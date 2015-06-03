@@ -28,9 +28,7 @@ function refreshAnalysis() {
       var promises = []
 
       for (var i = developers.length-1; i >= 0; --i) {
-        if (developers[i].name === 'Felix Wolff') {
-          promises.push(getRepositoriesFor(developers[i]))
-        }
+        promises.push(getRepositoriesFor(developers[i]))
       }
 
       q.all(promises)
