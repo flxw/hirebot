@@ -38,7 +38,7 @@ function analyzeRepositories(repos) {
   }
 
   q.all(promises).then(function() {
-    if (repos.length) log('analyzed all repositories for', repos[0].userid)
+    if (repos.length) log('analyzed all repositories for', _.uniq(_.map(repos, 'userid'))) // TODO collect all user IDs here
     else log('analyzed zero repositories because there were none')
 
     d.resolve()
@@ -272,7 +272,7 @@ function refreshAnalysis() {
 
       // collect newly created repositories and analyze
       for (var i = developers.length-1; i >= 0; --i) {
-        promises.push(repositories.fetchNew(developers[i]).then(analyzeRepositories))
+        promises.push(repositories.fetchNew(developers[i]))
       }
 
       // analyze the old ones

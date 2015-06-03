@@ -29,10 +29,13 @@ exports.acquireUserRepositories = function(u) {
     url: 'https://api.github.com/user/repos',
     qs: {
       access_token: u.access_token,
-      type: 'public'
+      type: 'all'
      },
     json: true,
-    headers: { 'User-Agent': 'hirebot-alpha' }
+    headers: {
+      Accept: 'application/vnd.github.moondragon+json',
+      'User-Agent': 'hirebot-alpha'
+    }
   }, deferred.resolve)
 
   return deferred.promise

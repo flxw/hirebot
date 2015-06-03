@@ -13,7 +13,8 @@ exports.fetchNew = function(user) {
   var d = q.defer()
   var promises = [
     gapi.acquireUserRepositories(user),
-    database.getRepositoriesFrom(user.id)
+    database.getRepositoriesFrom(user.id),
+    user.id
   ]
 
   q.all(promises)
@@ -33,20 +34,26 @@ function deselectKnownRepositories(repos) {
     return !_.contains(knownRepos, rp.name)
   })
 
-  return r
+  return {
+    unknownRepositories: r,
+    userid: repos[2]
+  }
 }
 
-function processNewRepositories(repos) {
+function processNewRepositories(data) {
   var deferred = q.defer()
+  var repos = data.unknownRepositories
   var promises = []
   var formattedRepos = []
 
   for (var i = 0, j = repos.length - 1; i <= j; i++) {
     var fr = {
-      userid: repos[i].owner.id,
+      userid: data.userid,
       name: repos[i].name,
       url: repos[i].html_url
     }
+
+    repos[i].userid = data.userid
 
     promises.push(processSingleRepository(repos[i]))
     promises.push(database.addRepository(fr))
@@ -68,7 +75,7 @@ function processNewRepositories(repos) {
 
 function processSingleRepository(repo) {
   var d = q.defer()
-  var where = path.join(config.repositoryFolder, String(repo.owner.id), repo.name)
+  var where = path.join(config.repositoryFolder, String(repo.userid), repo.name)
 
   git.Clone(repo.clone_url, where)
     .then(d.resolve)
