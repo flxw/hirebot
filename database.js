@@ -112,6 +112,21 @@ exports.setLastAnalyzedCommit = function(repo) {
   return d.promise
 }
 
+exports.addExperienceBulk = function(experiences) {
+  var d = q.defer()
+
+  db.run("BEGIN TRANSACTION")
+  experiences.forEach(function(experience) {
+    db.run(addExperienceQuery, experience.userid, experience.repo, experience.commit, experience.date.toISOString(), experience.language, experience.lines)
+  })
+  db.run("END", function(e,r) {
+    if (e) d.reject(e)
+    else d.resolve()
+  })
+
+  return d.promise
+}
+
 exports.addExperience = function(experience) {
   var d = q.defer()
 
