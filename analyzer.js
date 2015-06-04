@@ -15,7 +15,7 @@ winston.add(winston.transports.Console, {timestamp:true, colorize:true})
 process.on('message', function(m) {
   switch(m.type) {
     case 'newUser':
-      analyzeUserRepositories(m.user)
+      getRepositoriesFor(m.user).then(analyzeUserRepositories)
       break;
   }
 })
