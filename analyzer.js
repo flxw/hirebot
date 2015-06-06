@@ -6,8 +6,6 @@ var _        = require('lodash')
 var winston  = require('winston')
 var fork     = require('child_process').fork
 var gapi     = require('./githubapi.js')
-var fs       = require('fs')
-var path     = require('path')
 
 winston.remove(winston.transports.Console)
 winston.add(winston.transports.Console, {timestamp:true, colorize:true})
@@ -32,6 +30,7 @@ function refreshAnalysis() {
       }
 
       q.all(promises)
+        .then(function(r) { return _.flatten(r) })
         .then(analyzeUserRepositories)
         .catch(log)
         .done(function() {
@@ -43,32 +42,17 @@ function refreshAnalysis() {
 
 // --- analyzer logic ---------------------------
 
-function analyzeUserRepositories(repos) {
-  var d = q.defer()
-  var promises = []
+function analyzeUserRepositories(repos, d) {
+  if (!d) d = q.defer()
 
-  for (var i = repos.length - 1; i >= 0; i--) {
-    if (!fs.existsSync(path.join(__dirname, String(repos[i].userid)))) {
-      fs.mkdirSync(path.join(__dirname, String(repos[i].userid)))
-    }
-
-    for (var j = repos[i].knownRepositories.length - 1; j >= 0; j--) {
-      var kr = repos[i].knownRepositories[j]
-      promises.push(executeAnalyzerWorker(kr.userid, kr.name, kr.last_analyzed_commit))
-    }
-
-    for (var j = repos[i].unknownRepositories.length - 1; j >= 0; j--) {
-      var ukr = repos[i].unknownRepositories[j]
-      promises.push(executeAnalyzerWorker(repos[i].userid, ukr.name, null, ukr.html_url))
-    }
+  if (repos.length === 0) {
+    return d.resolve()
   }
 
-  q.all(promises).then(function() {
-    d.resolve()
-  }).progress(log)
-    .catch(function(e) {
-      log(e)
-      d.reject()
+  executeAnalyzerWorker(repos[0].userid, repos[0].name, repos[0].last_analyzed_commit, repos[0].html_url)
+    .done(function() {
+      repos.splice(0,1)
+      return analyzeUserRepositories(repos, d)
     })
 
   return d.promise
@@ -84,12 +68,14 @@ function executeAnalyzerWorker(userid, repositoryname, stopcommit, cloneurl) {
   if (cloneurl) parameters.push('--cloneurl=' + cloneurl)
   else if (stopcommit) parameters.push('--stopcommit=' + stopcommit)
 
-  fork('./analyzer-worker.js', parameters, function(error,stdout,stderr) {
-    if (error) {
-      log('worker failed', error, stdout, stderr)
+  var child = fork('./analyzer-worker.js', parameters, { execArgv: [] })
+
+  child.on('exit', function(exitCode) {
+    if (exitCode) {
+      log('worker failed')
       d.reject(e)
     } else {
-      d.notify('yo')
+      log('analyzed', userid, repositoryname)
       d.resolve()
     }
   })
@@ -120,11 +106,20 @@ function filterIntoNewAndKnown(repos) {
     return !_.contains(knownRepos, rp.name)
   })
 
-  return {
-    unknownRepositories: unknownRepos,
-    knownRepositories: knownRepos,
-    userid: repos[2]
+  for (var i = unknownRepos.length-1; i >= 0; i--) {
+    unknownRepos[i] = _.pick(unknownRepos[i], ['name', 'html_url'])
+    unknownRepos[i].userid = repos[2]
   }
+
+  for (var i = knownRepos.length-1; i >= 0; i--) {
+    knownRepos[i] = {
+      userid: repos[2],
+      name: knownRepos[i]
+    }
+  }
+
+  // unknown repositories will be identifiable via the exclusive html_url attribute
+  return knownRepos.concat(unknownRepos)
 }
 
 function log() {

@@ -11,7 +11,7 @@ var winston        = require('winston')
 
 var USERID, REPOSITORYNAME, CLONEURL, STOPCOMMIT
 
-if (process.argv.length < 5) {
+if (process.argv.length < 4) {
   process.exit(1)
 }
 
@@ -23,7 +23,7 @@ for (var i = process.argv.length-1; i >= 2; --i) {
     case '--repository': REPOSITORYNAME = parts[1]; break;
     case '--cloneurl': CLONEURL = parts[1]; break;
     case '--stopcommit': STOPCOMMIT = parts[1]; break;
-    default: process.exit(2); break;
+    default: console.log('bad arguments', process.argv); process.exit(2); break;
   }
 }
 
@@ -38,10 +38,11 @@ if (CLONEURL) {
     .then(collectDiffs)
     .then(analyzeDiffs)
     .then(function (experience) {
-      if (experience.length !== 0) return saveExperiences(experience, USERID, REPOSITORYNAME)
+      if (experience.length !== 0) return saveExperiences(experience, USERID, REPOSITORYNAME);
+      else return;
     })
     .catch(log)
-    .done(process.exit)
+    .done(function() { process.exit(0) })
 } else {
   ng.Repository.open(repositoryPath)
     .then(updateRepository)
@@ -54,7 +55,7 @@ if (CLONEURL) {
       if (experience.length !== 0) return saveExperiences(experience, USERID, REPOSITORYNAME)
     })
     .catch(log)
-    .done(process.exit)
+    .done(function() { process.exit(0) })
 }
 
 function updateRepository(gitRepo) {
