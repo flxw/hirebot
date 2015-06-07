@@ -68,7 +68,7 @@ function executeAnalyzerWorker(userid, repositoryname, stopcommit, cloneurl) {
   if (cloneurl) parameters.push('--cloneurl=' + cloneurl)
   else if (stopcommit) parameters.push('--stopcommit=' + stopcommit)
 
-  var child = fork('./analyzer-worker.js', parameters, { execArgv: [] })
+  var child = fork('./analyzer-worker.js', parameters, { execArgv: [/* '--debug-brk=41337' */] })
 
   child.on('exit', function(exitCode) {
     if (exitCode) {
@@ -101,25 +101,16 @@ function getRepositoriesFor(user) {
 
 function filterIntoNewAndKnown(repos) {
   var allRepos     = repos[0]
-  var knownRepos   = _.map(repos[1], 'name')
-  var unknownRepos = _.filter(allRepos, function(rp) {
-    return !_.contains(knownRepos, rp.name)
-  })
+  var knownRepoNames   = _.map(repos[1], 'name')
+  var unknownRepos = _.filter(allRepos, function(rp) { return !_.contains(knownRepoNames, rp.name) })
 
   for (var i = unknownRepos.length-1; i >= 0; i--) {
     unknownRepos[i] = _.pick(unknownRepos[i], ['name', 'html_url'])
     unknownRepos[i].userid = repos[2]
   }
 
-  for (var i = knownRepos.length-1; i >= 0; i--) {
-    knownRepos[i] = {
-      userid: repos[2],
-      name: knownRepos[i]
-    }
-  }
-
   // unknown repositories will be identifiable via the exclusive html_url attribute
-  return knownRepos.concat(unknownRepos)
+  return repos[1].concat(unknownRepos)
 }
 
 function log() {
