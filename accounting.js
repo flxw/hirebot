@@ -41,6 +41,8 @@ exports.initialize = function(p) {
             userData.id = profile.id
             userData.access_token = token
 
+            if (!userData.hireable) userData.hireable = false
+
             gapi.acquireUserEmails(userData)
               .then(database.saveUser)
               .then(function(u) {
