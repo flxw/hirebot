@@ -31,7 +31,7 @@
 
           line = template.replace(/%language%/, data[i].language)
                          .replace(/%firstcommitdate%/, (new Date(data[i].firstcommitdate)).toLocaleDateString())
-                         .replace(/%productivity%/, data[i].productivity)
+                         .replace(/%productivity%/, data[i].productivity.toFixed(2))
                          .replace(/%avgcommitsize%/, data[i].averagecommitsize)
                          .replace(/%linecount%/, data[i].linecount)
 
