@@ -57,6 +57,7 @@ var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
 var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
+var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -172,8 +173,16 @@ exports.getRepositoriesForAnalysis = function() {
 }
 
 exports.getAllDevelopers = function() {
+  return allRows(allDeveloperQuery)
+}
+
+exports.getLandingpageStatistitcs = function() {
+  return allRows(landingpageStatisticsQuery)
+}
+
+function allRows(query) {
   var d = q.defer()
-  db.all(allDeveloperQuery, function(e,r) {
+  db.all(query, function(e,r) {
     if (e) d.reject(e)
     else d.resolve(r)
   })
