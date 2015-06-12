@@ -73,7 +73,7 @@ function executeAnalyzerWorker(userid, repositoryname, stopcommit, cloneurl) {
   child.on('exit', function(exitCode) {
     if (exitCode) {
       log('worker failed')
-      d.reject()
+      d.resolve()
     } else {
       log('analyzed', userid, repositoryname)
       d.resolve()

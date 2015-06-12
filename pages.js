@@ -12,7 +12,7 @@ exports.renderIndex = function(req, res) {
 }
 
 function renderLandingpage(res) {
-  database.getLandingpageStatistitcs().then(function(r) { res.render('unauthorized-index', r[0]) })
+  database.getLandingpageStatistitcs().then(function(r) { r[0].daycount = r[0].daycount.toFixed(2); res.render('unauthorized-index', r[0]) })
 }
 
 function renderUserpage(req,res) {
