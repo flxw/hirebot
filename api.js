@@ -10,3 +10,9 @@ exports.getRepositories = function(req,res) {
       res.send(500)
     })
 }
+
+exports.getStatistics = function(req,res) {
+  database.getStatistics(req.user.id).then(function(r){
+    res.json(r).send()
+  })
+}

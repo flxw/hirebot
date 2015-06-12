@@ -7,44 +7,53 @@ var logger  = require('winston')
 
 db.serialize(function() {
     db.run('CREATE TABLE IF NOT EXISTS users(' +
-    'id INTEGER NOT NULL,' +
-    'access_token VARCHAR(255) NOT NULL,' +
-    'name VARCHAR(255) NOT NULL DEFAULT "",' +
-    'profileurl VARCHAR(255) NOT NULL DEFAULT "",' +
-    'avatarurl VARCHAR(255) NOT NULL DEFAULT "http://placehold.it/250x300",' +
-    'location VARCHAR(255),' +
-    'bio VARCHAR(255),' +
-    'hireable BOOLEAN NOT NULL,' +
-    'followers INTEGER NOT NULL,' +
-    'following INTEGER NOT NULL,' +
-    'is_recruiter BOOLEAN NOT NULL,' +
-    'is_valid BOOLEAN NOT NULL,' +
-    'PRIMARY KEY(id))');
+      'id INTEGER NOT NULL,' +
+      'access_token VARCHAR(255) NOT NULL,' +
+      'name VARCHAR(255) NOT NULL DEFAULT "",' +
+      'profileurl VARCHAR(255) NOT NULL DEFAULT "",' +
+      'avatarurl VARCHAR(255) NOT NULL DEFAULT "http://placehold.it/250x300",' +
+      'location VARCHAR(255),' +
+      'bio VARCHAR(255),' +
+      'hireable BOOLEAN NOT NULL,' +
+      'followers INTEGER NOT NULL,' +
+      'following INTEGER NOT NULL,' +
+      'is_recruiter BOOLEAN NOT NULL,' +
+      'is_valid BOOLEAN NOT NULL,' +
+      'PRIMARY KEY(id))');
 
     db.run('CREATE TABLE IF NOT EXISTS useremails(' +
-    'userid INTEGER NOT NULL,' +
-    'email VARCHAR(255) NOT NULL,' +
-    'prime BOOLEAN NOT NULL,' +
-    'verified BOOLEAN NOT NULL,' +
-    'FOREIGN KEY(userid) REFERENCES users(id))')
+      'userid INTEGER NOT NULL,' +
+      'email VARCHAR(255) NOT NULL,' +
+      'prime BOOLEAN NOT NULL,' +
+      'verified BOOLEAN NOT NULL,' +
+      'FOREIGN KEY(userid) REFERENCES users(id))')
 
     db.run('CREATE TABLE IF NOT EXISTS repositories(' +
-    'userid INTEGER NOT NULL,' +
-    'name VARCHAR(255) NOT NULL DEFAULT "",' +
-    'url VARCHAR(255) NOT NULL, ' +
-    'lastcheck DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
-    'last_analyzed_commit VARCHAR(255),' +
-    'FOREIGN KEY(userid) REFERENCES users(id))')
+      'userid INTEGER NOT NULL,' +
+      'name VARCHAR(255) NOT NULL DEFAULT "",' +
+      'url VARCHAR(255) NOT NULL, ' +
+      'lastcheck DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,' +
+      'last_analyzed_commit VARCHAR(255),' +
+      'FOREIGN KEY(userid) REFERENCES users(id))')
 
     db.run('CREATE TABLE IF NOT EXISTS statistics(' +
-    'userid INTEGER NOT NULL,' +
-    'reponame VARCHAR(255) NOT NULL,' +
-    'commitid VARCHAR(255) NOT NULL,' +
-    'date DATETIME NOT NULL,' +
-    'language VARCHAR(255) NOT NULL,' +
-    'lines INTEGER NOT NULL,' +
-    'PRIMARY KEY(userid,reponame,commitid,language),' +
-    'FOREIGN KEY(userid) REFERENCES users(id))')
+      'userid INTEGER NOT NULL,' +
+      'reponame VARCHAR(255) NOT NULL,' +
+      'commitid VARCHAR(255) NOT NULL,' +
+      'date DATETIME NOT NULL,' +
+      'language VARCHAR(255) NOT NULL,' +
+      'lines INTEGER NOT NULL,' +
+      'PRIMARY KEY(userid,reponame,commitid,language),' +
+      'FOREIGN KEY(userid) REFERENCES users(id))')
+
+    db.run('CREATE VIEW IF NOT EXISTS calculatedmetric AS ' +
+      'SELECT userid, language, MIN(date) AS firstcommitdate, MAX(date) AS lastcommitdate, SUM(lines) AS linecount,' +
+      'COUNT(commitid) AS commitcount, julianday(MAX(date)) - julianday(MIN(date)) AS timespan,' +
+      'SUM(lines)/COUNT(commitid) AS averagecommitsize,' +
+      '(julianday(MAX(date)) - julianday(MIN(date)))/COUNT(commitid) AS productivity ' +
+      'FROM statistics GROUP BY userid, language ' +
+      'HAVING MIN(date) <> MAX(date) ' +
+      'ORDER BY userid, timespan DESC, productivity ASC')
 })
 
 var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
@@ -58,6 +67,7 @@ var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
 var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
+var personalDataQuery = 'SELECT * FROM calculatedmetric WHERE userid = ?'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -178,6 +188,15 @@ exports.getAllDevelopers = function() {
 
 exports.getLandingpageStatistitcs = function() {
   return allRows(landingpageStatisticsQuery)
+}
+
+exports.getStatistics = function(userid) {
+  var d = q.defer()
+  db.all(personalDataQuery, userid, function(e,r) {
+    if (e) d.reject(e)
+    else d.resolve(r)
+  })
+  return d.promise
 }
 
 function allRows(query) {

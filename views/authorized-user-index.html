@@ -14,38 +14,49 @@
   <div class="container">
     <div class="section">
       <div class="row">
+        <div class="col s12 m7">
+          <div class="icon-block">
+            <p class="light">We looked at your public repositories, picked out your commits and ran some algorithms
+            over the data that they contained. This is what we found. If this is empty, please notify me.</p>
+          </div>
+
+          <table class="centered hoverable">
+            <thead>
+              <tr>
+                <th data-field="language">Language</th>
+                <th data-field="first-commit">First commit</th>
+                <th data-field="commits-per-day">Average commits per day</th>
+                <th data-field="commitsize">Average commitsize</th>
+                <th data-field="linecount">Lines written</th>
+              </tr>
+            </thead>
+
+            <tbody id="tbody">
+            </tbody>
+          </table>
+
+        </div>
+
         <div class="col s12 m4">
           <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="mdi-action-done"></i></h2>
-            <h5 class="center">Thank you so much!</h5>
+            <h5 class="center light-blue-text"><i class="mdi-action-grade"></i> Thank you so much! <i class="mdi-action-grade"></i></h5>
 
             <p class="light">
               The repositories listed here will now be used for code profiling and bachelor thesis research!
-              We'll let you know when further developments have taken place.
-            </p>
-          </div>
-
-          <div class="icon-block">
-            <h2 class="center light-blue-text"><i class="mdi-action-info-outline"></i></h2>
-            <h5 class="center">A short notice</h5>
-
-            <p class="light">
               We will analyze your commits and run some statistics over your code.
               We can only analyze what you provide us with - so please make sure
               that your all e-mail addresses that you have ever used are listed in your
-              GitHub account
+              GitHub account.
             </p>
           </div>
-        </div>
-
-        <div class="col s12 m8">
-           <ul id="repo-collection" class="collection with-header">
+          <br>
+          <ul id="repo-collection" class="collection with-header">
             <li class="collection-header">
-              <h5>Tracked repositories <a id='refresh-repos'><i class="mdi-navigation-refresh"></i></a></h5>
+              <h5>Tracked repositories</h5>
             </li>
-            {% for repo in repos %}
+            <!--{% for repo in repos %}
               <li class="repo collection-item">Alvin</li>
-            {% endfor %}
+            {% endfor %}-->
           </ul>
         </div>
       </div>
