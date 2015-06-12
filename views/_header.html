@@ -4,6 +4,7 @@
     {% if user %}
     <div class="valign-wrapper right" style="height:100%">
       <!--<li><a href=""><i class="mdi-action-search left"></i>Reload GitHub profile</a></li>-->
+      <a id='refresh-repos'><i class="mdi-navigation-refresh left"></i> Refresh displayed data</a>
       <img class="responsive-img circle" src="{{ user.avatarurl }}" style="height:80%; margin-right: 1em">{{ user.name }}
     </div>
     {% endif %}

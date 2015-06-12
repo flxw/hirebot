@@ -10,7 +10,13 @@ exports.initialize = function(app, passport) {
   app.get('/register', passport.authenticate('github'))
   app.get('/register/callback', passport.authenticate('github', { successRedirect: '/', failureRedirect: '/' }))
 
-  app.get('/api/repositories', api.getRepositories)
+  app.route('/api/repositories')
+    .all(isLoggedIn)
+    .get(api.getRepositories)
+
+  app.route('/api/statistics')
+    .all(isLoggedIn)
+    .get(api.getStatistics)
 }
 
 // route middleware to make sure a user is logged in
