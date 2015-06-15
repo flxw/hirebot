@@ -10,6 +10,7 @@ db.serialize(function() {
       'id INTEGER NOT NULL,' +
       'access_token VARCHAR(255) NOT NULL,' +
       'name VARCHAR(255) NOT NULL DEFAULT "",' +
+      'profilename VARCHAR(255) NOT NULL,' +
       'profileurl VARCHAR(255) NOT NULL DEFAULT "",' +
       'avatarurl VARCHAR(255) NOT NULL DEFAULT "http://placehold.it/250x300",' +
       'location VARCHAR(255),' +
@@ -56,7 +57,7 @@ db.serialize(function() {
       'ORDER BY userid, timespan DESC, productivity ASC')
 })
 
-var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?)'
+var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
 var newMailQuery = 'INSERT OR REPLACE INTO useremails VALUES(?,?,?,?)'
 var userQuery    = 'SELECT * FROM users WHERE id = ?'
 var newRepoQuery = 'INSERT INTO repositories(userid, name, url) VALUES(?,?,?)'
@@ -74,7 +75,8 @@ exports.saveUser = function(user) {
 
   if (!user.avatar_url) user.avatar_url = "http://placehold.it/250x300"
 
-  db.run(newUserQuery, user.id, user.access_token, user.name, user.profileurl, user.avatar_url, user.location, user.bio,
+  db.run(newUserQuery, user.id, user.access_token, user.name, user.login,
+    user.html_url, user.avatar_url, user.location, user.bio,
     user.hireable, user.followers, user.following, false, true,
     function (error) {
       if (error) deferred.reject(error)
