@@ -47,6 +47,36 @@ db.serialize(function() {
       'PRIMARY KEY(userid,reponame,commitid,language),' +
       'FOREIGN KEY(userid) REFERENCES users(id))')
 
+    db.run('CREATE TABLE IF NOT EXISTS jsstatistics(' +
+      'userid INTEGER NOT NULL,' +
+      'reponame VARCHAR(255) NOT NULL,' +
+      'commitid VARCHAR(255) NOT NULL,' +
+      'filename VARCHAR(255) NOT NULL,' +
+      'maintainability_before INTEGER NOT NULL,' +
+      'maintainability_after INTEGER NOT NULL,' +
+      'dependencies_before INTEGER NOT NULL,' +
+      'dependencies_after INTEGER NOT NULL,' +
+      'physical_sloc_before INTEGER NOT NULL,' +
+      'physical_sloc_after INTEGER NOT NULL,' +
+      'logical_sloc_before INTEGER NOT NULL,' +
+      'logical_sloc_after INTEGER NOT NULL,' +
+      'cyclomatic_complexity_before INTEGER NOT NULL,' +
+      'cyclomatic_complexity_after INTEGER NOT NULL,' +
+      'halstead_vocabulary_before INTEGER NOT NULL,' +
+      'halstead_vocabulary_after INTEGER NOT NULL,' +
+      'halstead_difficulty_before INTEGER NOT NULL,' +
+      'halstead_difficulty_after INTEGER NOT NULL,' +
+      'halstead_volume_before INTEGER NOT NULL,' +
+      'halstead_volume_after INTEGER NOT NULL,' +
+      'halstead_effort_before INTEGER NOT NULL,' +
+      'halstead_effort_after INTEGER NOT NULL,' +
+      'halstead_bugs_before INTEGER NOT NULL,' +
+      'halstead_bugs_after INTEGER NOT NULL,' +
+      'halstead_time_before INTEGER NOT NULL,' +
+      'halstead_time_after INTEGER NOT NULL,' +
+      'PRIMARY KEY(userid,reponame,commitid,filename),' +
+      'FOREIGN KEY(userid) REFERENCES users(id))')
+
     db.run('CREATE VIEW IF NOT EXISTS calculatedmetric AS ' +
       'SELECT userid, language, MIN(date) AS firstcommitdate, MAX(date) AS lastcommitdate, SUM(lines) AS linecount,' +
       'COUNT(commitid) AS commitcount, julianday(MAX(date)) - julianday(MIN(date)) AS timespan,' +
@@ -64,6 +94,7 @@ var newRepoQuery = 'INSERT INTO repositories(userid, name, url) VALUES(?,?,?)'
 var repositoryQuery = 'SELECT * FROM repositories WHERE userid = ?'
 var setLastAnalyzedCommit  = 'UPDATE repositories SET last_analyzed_commit = ?, lastcheck = CURRENT_TIMESTAMP WHERE userid = ? AND name = ?'
 var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?,?)'
+var addJsStatisticsQuery = 'INSERT INTO jsstatistics VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
 var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
@@ -120,6 +151,36 @@ exports.setLastAnalyzedCommit = function(repo) {
   db.run(setLastAnalyzedCommit, repo.commit, repo.userid, repo.name, function(error) {
     if (error) d.reject(error)
     else d.resolve()
+  })
+
+  return d.promise
+}
+
+exports.addJsStatisticsBulk = function(bulk, uid, reponame) {
+  var d = q.defer()
+
+  db.serialize(function() {
+    db.run("BEGIN TRANSACTION")
+    bulk.forEach(function (e) {
+      db.run(addJsStatisticsQuery,
+        uid, reponame, e.commit, e.path,
+        e.before.maintainability, e.after.maintainability,
+        e.before.dependencies, e.after.dependencies,
+        e.before.aggregate.sloc.physical, e.after.aggregate.sloc.physical,
+        e.before.aggregate.sloc.logical, e.after.aggregate.sloc.logical,
+        e.before.aggregate.cyclomatic, e.after.aggregate.cyclomatic,
+        e.before.aggregate.halstead.vocabulary, e.after.aggregate.halstead.vocabulary,
+        e.before.aggregate.halstead.difficulty, e.after.aggregate.halstead.difficulty,
+        e.before.aggregate.halstead.volume, e.after.aggregate.halstead.volume,
+        e.before.aggregate.halstead.effort, e.after.aggregate.halstead.effort,
+        e.before.aggregate.halstead.bugs, e.after.aggregate.halstead.bugs,
+        e.before.aggregate.halstead.time, e.after.aggregate.halstead.time
+      )
+    })
+    db.run("END TRANSACTION", function (e, r) {
+      if (e) d.reject(e)
+      else d.resolve()
+    })
   })
 
   return d.promise

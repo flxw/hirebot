@@ -1,6 +1,7 @@
 'use strict';
 
 var database = require('./database.js')
+var logger = require('winston')
 
 
 exports.renderIndex = function(req, res) {
@@ -12,7 +13,14 @@ exports.renderIndex = function(req, res) {
 }
 
 function renderLandingpage(res) {
-  database.getLandingpageStatistitcs().then(function(r) { r[0].daycount = r[0].daycount.toFixed(2); res.render('unauthorized-index', r[0]) })
+  database.getLandingpageStatistitcs()
+    .then(function(r) {
+      var renderParams = r[0]
+
+      if (renderParams.daycount !== null) renderParams.daycount = renderParams.daycount.toFixed(2)
+
+      res.render('unauthorized-index', renderParams)
+    })
 }
 
 function renderUserpage(req,res) {

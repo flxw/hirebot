@@ -8,6 +8,7 @@ var database       = require('./database.js')
 var languagedetect = require('language-detect')
 var _              = require('lodash')
 var winston        = require('winston')
+var jscomplex      = require('escomplex-js')
 
 var USERID, REPOSITORYNAME, CLONEURL, STOPCOMMIT
 
@@ -37,10 +38,7 @@ if (CLONEURL) {
     .then(collectCommitsForAnalysis)
     .then(collectDiffs)
     .then(analyzeDiffs)
-    .then(function (experience) {
-      if (experience.length !== 0) return saveExperiences(experience, USERID, REPOSITORYNAME);
-      else return;
-    })
+    .then(saveExperiences)
     .catch(log)
     .done(function() { process.exit(0) })
 } else {
@@ -51,9 +49,7 @@ if (CLONEURL) {
     .then(collectCommitsForAnalysis)
     .then(collectDiffs)
     .then(analyzeDiffs)
-    .then(function (experience) {
-      if (experience.length !== 0) return saveExperiences(experience, USERID, REPOSITORYNAME)
-    })
+    .then(saveExperiences)
     .catch(log)
     .done(function() { process.exit(0) })
 }
@@ -85,6 +81,12 @@ function gatherDataForAnalysis(u) {
   promises.push(getMostRecentCommitFromCurrentBranch(u.rep))
 
   q.all(promises).then(function() {
+    database.setLastAnalyzedCommit({
+      userid: USERID,
+      name: REPOSITORYNAME,
+      commit: promises[1].id().tostrS()
+    })
+
     return d.resolve({
       mails: _.map(promises[0], 'email'),
       commit: promises[1],
@@ -132,8 +134,7 @@ function collectDiffs(commitsForAnalysis) {
       for (var i = 0, j = promises.length; i < j; ++i) {
         promises[i] = {
           diff: promises[i],
-          commit: commitsForAnalysis[i].id().tostrS(),
-          date: commitsForAnalysis[i].date()
+          commit: commitsForAnalysis[i]
         }
       }
 
@@ -149,17 +150,23 @@ function analyzeDiffs(diffs) {
   var promises = []
 
   for (var i = 0, j = diffs.length; i < j; ++i) {
-    promises.push(analyzeDiff(diffs[i].diff))
+    promises.push(analyzeDiff(diffs[i]))
   }
 
-  q.all(promises).then(function(experiences) {
-    for (var i = 0, j = experiences.length; i < j; ++i) {
-      experiences[i] = {
-        languages: experiences[i],
-        commit: diffs[i].commit,
-        date: diffs[i].date
-      }
+  q.all(promises).then(function(results) {
+    var experiences = { general: [], js: []}
+
+    for (var i = 0, j = results.length; i < j; ++i) {
+      experiences.general.push({
+        languages: results[i].general,
+        commit: diffs[i].commit.id().tostrS(),
+        date: diffs[i].commit.date()
+      })
+
+      if (results[i].js) experiences.js.push(results[i].js)
     }
+
+    experiences.js = _.flatten(experiences.js)
 
     d.resolve(experiences);
   })
@@ -167,17 +174,19 @@ function analyzeDiffs(diffs) {
   return d.promise
 }
 
-function analyzeDiff(diffGroup) {
+function analyzeDiff(diffData) {
   var deferred = q.defer()
+  var fileNames = []
   var experienceFromThisCommit = {}
+  var diffGroup = diffData.diff
 
   for (var i_diff = 0; i_diff < diffGroup.length; ++i_diff) {
     var patches = diffGroup[i_diff].patches()
 
     for (var i_patch = 0; i_patch < patches.length; ++i_patch) {
-      var file  = patches[i_patch].newFile().path()
       var hunks = patches[i_patch].hunks()
       var newLines = 0
+      var filename = patches[i_patch].newFile().path()
 
       for (var i_hunk = 0; i_hunk < hunks.length; ++i_hunk) {
         var hunkLines = hunks[i_hunk].lines()
@@ -189,51 +198,104 @@ function analyzeDiff(diffGroup) {
         }
       }
 
-      var language = languagedetect.filename(file)
+      var language = languagedetect.filename(filename)
       if (language !== undefined) {
         if (language in experienceFromThisCommit) {
           experienceFromThisCommit[language] += newLines
         } else {
           experienceFromThisCommit[language] = newLines
         }
+
+        if (language === 'JavaScript' && !_.includes(fileNames, filename)) {
+          fileNames.push(filename)
+        }
       }
     }
   }
 
-  deferred.resolve(experienceFromThisCommit)
+  if (fileNames.length > 0) {
+    var promises = []
+
+    for (var i = 0, j = fileNames.length; i < j; i++) {
+      promises.push(runJavascriptMetrics(fileNames[i], diffData.commit))
+    }
+
+    q.allSettled(promises).then(function (jsMetrics) {
+      var doneJsMetrics = _.pluck(_.filter(jsMetrics, 'state', 'fulfilled'), 'value')
+
+      if (doneJsMetrics.length) deferred.resolve({ general: experienceFromThisCommit, js: doneJsMetrics })
+      else deferred.resolve({ general: experienceFromThisCommit })
+    })
+  } else {
+    deferred.resolve({general: experienceFromThisCommit})
+  }
 
   return deferred.promise
+}
+
+function runJavascriptMetrics(filePath, commit) {
+  var d = q.defer()
+
+  commit.getParents(1).then(function(parentCommit) {
+    parentCommit = parentCommit[0]
+    return commit.getEntry(filePath).then(function(commitEntry) {
+      return parentCommit.getEntry(filePath).then(function(parentEntry) {
+        return commitEntry.getBlob().then(function(commitBlob) {
+          return parentEntry.getBlob().then(function(parentBlob) {
+            var commitContent = commitBlob.toString()
+            var parentContent = parentBlob.toString()
+
+            // now run js-analyzer and save metrics somehow
+            var commitMetrics = jscomplex.analyse(commitContent)
+            var parentMetrics = jscomplex.analyse(parentContent)
+
+            commitMetrics.dependencies = commitMetrics.dependencies.length
+            parentMetrics.dependencies = parentMetrics.dependencies.length
+
+            delete commitMetrics.functions
+            delete parentMetrics.functions
+
+            d.resolve({
+              commit: commit.id().tostrS(),
+              path: filePath,
+              before: parentMetrics,
+              after: commitMetrics
+            })
+          })
+        })
+      })
+    })
+  }).catch(d.reject)
+
+
+  return d.promise
 }
 
 // NOTE if experiences seem to be missing,
 // check that the email with which the commit
 // was made, is actually listed on github
-function saveExperiences(exp, userid, reponame) {
+function saveExperiences(exp) {
   var d  = q.defer()
   var savepromises = []
   var experiences = []
 
-  for (var i = exp.length - 1; i >= 0; i--) {
-    var languages = Object.keys(exp[i].languages)
+  for (var i = exp.general.length - 1; i >= 0; i--) {
+    var languages = Object.keys(exp.general[i].languages)
 
     for (var j = languages.length - 1; j >= 0; j--) {
       experiences.push({
-        userid: userid,
-        repo: reponame,
-        commit: exp[i].commit,
-        date: exp[i].date,
+        userid: USERID,
+        repo: REPOSITORYNAME,
+        commit: exp.general[i].commit,
+        date: exp.general[i].date,
         language: languages[j],
-        lines: exp[i].languages[languages[j]]
+        lines: exp.general[i].languages[languages[j]]
       })
     }
   }
 
+  savepromises.push(database.addJsStatisticsBulk(exp.js, USERID, REPOSITORYNAME))
   savepromises.push(database.addExperienceBulk(experiences))
-  savepromises.push(database.setLastAnalyzedCommit({
-    userid: userid,
-    name: reponame,
-    commit: exp[0].commit
-  }))
 
   q.all(savepromises).then(d.resolve).catch(d.reject)
 
