@@ -6,6 +6,7 @@ var pages  = require('./pages.js')
 
 exports.initialize = function(app, passport) {
   app.get('/', pages.renderIndex)
+  app.get('/javascript', isLoggedIn, pages.renderJsStatistics)
 
   app.get('/register', passport.authenticate('github'))
   app.get('/register/callback', passport.authenticate('github', { successRedirect: '/', failureRedirect: '/' }))

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>HireBot</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.96.1/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="/assets/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+{% include "./_header.html" %}
+
+<div class="container">
+  <div class="section">
+    <div class="row">
+      <!-- larger central bar -->
+      <div class="col s12 m7">
+
+        <table class="centered hoverable">
+          <thead>
+          <tr>
+            <th>File</th>
+            <th>Ratio SLOC logical:physical</th>
+            <th>Maintainability</th>
+            <th>Halstead difficulty</th>
+            <th>Halstead volume</th>
+          </tr>
+          </thead>
+
+          <tbody id="tbody">
+          {% for stat in statistics %}
+          <tr>
+            <td><a href="https://github.com/{{user.profilename}}/{{stat.reponame}}/commit/{{stat.commitid}}/{{stat.filename}}">{{stat.filename}}</a></td>
+            <td>{{stat.pl_ratio | trimFloat}} ({{stat.pl_ratio_change | trimFloat}})</td>
+            <td>{{stat.maintainability_after | trimFloat}} ({{stat.maintainability_change | trimFloat}}</td>
+            <td>{{stat.halstead_difficulty_after | trimFloat}} ({{stat.halstead_difficulty_change | trimFloat}})</td>
+            <td>{{stat.halstead_volume_after | trimFloat}} ({{stat.halstead_difficulty_change | trimFloat}})</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+
+      <!-- small sidebar to the right -->
+      <div class="col s12 m4 offset-m1">
+        <ul class="collapsible popout" data-collapsible="expandable">
+          <li>
+            <div class="collapsible-header"><span class="light-blue-text">McCabe</span> Complexity</div>
+            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+          </li>
+          <li>
+            <div class="collapsible-header active"><span class="light-blue-text">Maintainability</span> Index</div>
+            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+          </li>
+          <li>
+            <div class="collapsible-header"><i class="mdi-social-whatshot"></i>Third</div>
+            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% include "./_footer.html" %}
+</body>
+</html>

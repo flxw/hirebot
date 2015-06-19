@@ -22,7 +22,7 @@
     function refreshStatistics() {
       $.get("/api/statistics").done(function(data) {
         var tbody = $("#tbody")
-        var template = "<tr><td>%language%</td><td>%firstcommitdate%</td><td>%productivity%</td><td>%avgcommitsize%</td><td>%linecount%</td></tr>"
+        var template = "<tr><td>%language%</td><td>%timespan%</td><td>%productivity%</td><td>%avgcommitsize%</td><td>%linecount%</td></tr>"
 
         tbody.empty();
 
@@ -30,7 +30,7 @@
           var line = template
 
           line = template.replace(/%language%/, data[i].language)
-                         .replace(/%firstcommitdate%/, (new Date(data[i].firstcommitdate)).toLocaleDateString())
+                         .replace(/%timespan%/, data[i].timespan.toFixed(2))
                          .replace(/%productivity%/, data[i].productivity.toFixed(2))
                          .replace(/%avgcommitsize%/, data[i].averagecommitsize)
                          .replace(/%linecount%/, data[i].linecount)

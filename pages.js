@@ -12,8 +12,13 @@ exports.renderIndex = function(req, res) {
   }
 }
 
+exports.renderJsStatistics = function(req,res) {
+  database.getJsStatistics(req.user.id)
+    .then(function(data) { debugger; res.render('javascript', { user:req.user, statistics: data }) })
+}
+
 function renderLandingpage(res) {
-  database.getLandingpageStatistitcs()
+  database.getLandingpageStatistics()
     .then(function(r) {
       var renderParams = r[0]
 
@@ -30,7 +35,6 @@ function renderUserpage(req,res) {
     file = 'authorized-recruiter-index'
   } else {
     file = 'authorized-user-index'
-    data.script = 'user.js'
   }
 
   res.render(file, data)

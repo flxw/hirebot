@@ -24,7 +24,7 @@
             <thead>
               <tr>
                 <th data-field="language">Language</th>
-                <th data-field="first-commit">First commit</th>
+                <th data-field="timespan">Measured timespan in days</th>
                 <th data-field="commits-per-day">Average commits per day</th>
                 <th data-field="commitsize">Average lines per commit</th>
                 <th data-field="linecount">Total lines</th>
@@ -39,14 +39,12 @@
 
         <div class="col s12 m4">
           <div class="icon-block">
-            <h5 class="center light-blue-text"><i class="mdi-action-grade"></i> Thank you so much! <i class="mdi-action-grade"></i></h5>
+            <h1 class="center light-blue-text"><i class="mdi-editor-insert-chart"></i></h1>
+            <h5 class="center light">JavaScript details available!</h5>
 
             <p class="light">
-              The repositories listed here will now be used for code profiling and bachelor thesis research!
-              We will analyze your commits and run some statistics over your code.
-              We can only analyze what you provide us with - so please make sure
-              that your all e-mail addresses that you have ever used are listed in your
-              GitHub account.
+              We now provide McCabe and Halstead complexity measures
+              specifically for JavaScript!
             </p>
           </div>
           <br>
@@ -61,5 +59,6 @@
   </div>
 
   {% include "./_footer.html" %}
-  </body>
+  <script src="/assets/js/user.js"></script>
+</body>
 </html>

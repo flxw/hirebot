@@ -1,12 +1,13 @@
 <nav class="light-blue" role="navigation">
-  <div class="nav-wrapper container">
-    <a href="#!" class="brand-logo">HireBot</a>
+  <div class="nav-wrapper container"><a href="#" class="brand-logo">HireBot</a>
     {% if user %}
-    <div class="valign-wrapper right" style="height:100%">
-      <!--<li><a href=""><i class="mdi-action-search left"></i>Reload GitHub profile</a></li>-->
-      <a id='refresh-repos'><i class="mdi-navigation-refresh left"></i> Refresh displayed data</a>
-      <img class="responsive-img circle" src="{{ user.avatarurl }}" style="height:80%; margin-right: 1em">{{ user.name }}
-    </div>
+    <!--<li><a href=""><i class="mdi-action-search left"></i>Reload GitHub profile</a></li>-->
+
+    <ul class="right hide-on-med-and-down" style="height:100%">
+      <li><a href="/">General</a></li>
+      <li><a href="/javascript">JavaScript</a></li>
+      <li class="right valign-wrapper" style="height:100%"> {{ user.name }} <img class="responsive-img circle" src="{{ user.avatarurl }}" style="height:80%; margin-left: 1em"></li>
+    </ul>
     {% endif %}
   </div>
 </nav>
