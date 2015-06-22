@@ -33,7 +33,7 @@
           <tr>
             <td><a href="https://github.com/{{user.profilename}}/{{stat.reponame}}/commit/{{stat.commitid}}/{{stat.filename}}">{{stat.filename}}</a></td>
             <td>{{stat.pl_ratio | trimFloat}} ({{stat.pl_ratio_change | trimFloat}})</td>
-            <td>{{stat.maintainability_after | trimFloat}} ({{stat.maintainability_change | trimFloat}}</td>
+            <td>{{stat.maintainability_after | trimFloat}} ({{stat.maintainability_change | trimFloat}})</td>
             <td>{{stat.halstead_difficulty_after | trimFloat}} ({{stat.halstead_difficulty_change | trimFloat}})</td>
             <td>{{stat.halstead_volume_after | trimFloat}} ({{stat.halstead_difficulty_change | trimFloat}})</td>
           </tr>
@@ -47,16 +47,53 @@
       <div class="col s12 m4 offset-m1">
         <ul class="collapsible popout" data-collapsible="expandable">
           <li>
+            <div class="collapsible-header active"><span class="light-blue-text">How To Read This</span></div>
+            <div class="collapsible-body"><p>
+              For each commit we have analyzed the changed files and run some metrics over them.
+              Each file yielded several numbers which you can see in the table to the left.
+              Click on a filename to be redirected to the GitHub view of the diff.
+              The numbers in brackets denote the <i>percentual change</i> to the value before the commit.
+              Thus it is possible to see which commit introduced or reduced complexity.
+              The table is sorted by descending difficulty. This way you can see your worst commits and
+              learn from these insights.
+            </p></div>
+          </li>
+
+          <li>
             <div class="collapsible-header"><span class="light-blue-text">McCabe</span> Complexity</div>
-            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+            <div class="collapsible-body"><p>
+              This measure describes the number of distinct paths through your code.
+              This means that an if/else block would be two distinct paths, while two ifs would provide four already.
+              Read more <a href="https://en.wikipedia.org/wiki/Cyclomatic_complexity">here</a>.
+            </p></div>
           </li>
           <li>
-            <div class="collapsible-header active"><span class="light-blue-text">Maintainability</span> Index</div>
-            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+            <div class="collapsible-header"><span class="light-blue-text">Maintainability</span> Index</div>
+            <div class="collapsible-body"><p>
+              Aas the name states, this shows how easy to support and change the source code is.
+              The maintainability index is calculated as a factored formula consisting of Lines Of Code,
+              Cyclomatic Complexity and Halstead volume. It is used in several adapted forms in IDEs, like
+              MS Visual Studio.
+              <br><br>
+              MI = 171 - 5.2 * ln(Halstead Volume) - 0.23 * (Cyclomatic Complexity) - 16.2 * ln(LOC)
+            </p></div>
           </li>
           <li>
-            <div class="collapsible-header"><i class="mdi-social-whatshot"></i>Third</div>
-            <div class="collapsible-body"><p>Lorem ipsum dolor sit amet.</p></div>
+            <div class="collapsible-header"><span class="light-blue-text">Halstead</span> Volume</span></div>
+            <div class="collapsible-body"><p>
+              Introduced by Maurice Halstead in 1977, these metrics tell us about the complexity of programs
+              and allow statements about coding time. It is based on four simple numbers:
+              <br><br>
+              n1 = the number of distinct operators<br>
+              n2 = the number of distinct operands<br>
+              N1 = the total number of operators<br>
+              N2 = the total number of operands<br>
+              <br>
+              Vocabulary n = n1 + n2<br>
+              Program length N = N1 + N2<br>
+              Volume =  N * log_2(n)<br>
+              Difficulty D = <sup>n1</sup>&frasl;<sub>2</sub> * <sup>N2</sup>&frasl;<sub>n2</sub>
+            </p></div>
           </li>
         </ul>
       </div>

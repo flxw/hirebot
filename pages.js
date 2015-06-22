@@ -2,11 +2,15 @@
 
 var database = require('./database.js')
 var logger = require('winston')
-
+var q = require('q')
 
 exports.renderIndex = function(req, res) {
   if (req.isAuthenticated()) {
-    renderUserpage(req,res)
+    if (req.user.is_recruiter) {
+      renderRecruiterPage(req,res)
+    } else {
+      renderUserpage(req, res)
+    }
   } else {
     renderLandingpage(res)
   }
@@ -29,13 +33,20 @@ function renderLandingpage(res) {
 }
 
 function renderUserpage(req,res) {
-  var file, data = { user: req.user }
+  var promises = [
+    database.getRepositoriesFrom(req.user.id),
+    database.getStatistics(req.user.id)
+  ]
 
-  if (req.user.is_recruiter) {
-    file = 'authorized-recruiter-index'
-  } else {
-    file = 'authorized-user-index'
-  }
+  q.all(promises).then(function() {
+    res.render('authorized-user-index', {
+      user: req.user,
+      repositories: promises[0],
+      statistics: promises[1]
+    })
+  })
+}
 
-  res.render(file, data)
+function renderRecruiterPage(req,res) {
+
 }

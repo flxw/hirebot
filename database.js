@@ -109,7 +109,7 @@ var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIM
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
 var personalDataQuery = 'SELECT * FROM calculatedmetric WHERE userid = ? ORDER BY linecount DESC'
-var personalJsDataQuery = 'SELECT * FROM processedjsstatistics WHERE userid = ?'
+var personalJsDataQuery = 'SELECT * FROM processedjsstatistics WHERE userid = ? ORDER BY halstead_difficulty_change DESC'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
