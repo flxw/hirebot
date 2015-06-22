@@ -255,6 +255,9 @@ function runJavascriptMetrics(filePath, commit) {
             delete commitMetrics.functions
             delete parentMetrics.functions
 
+            delete commitContent
+            delete parentContent
+
             d.resolve({
               commit: commit.id().tostrS(),
               path: filePath,

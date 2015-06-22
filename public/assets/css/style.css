@@ -16,3 +16,6 @@ footer.page-footer {
 #refresh-repos {
   margin-right: 1em;
 }
+#headerlist > li {
+  padding: 0.25em;
+}

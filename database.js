@@ -85,6 +85,15 @@ db.serialize(function() {
       'FROM statistics GROUP BY userid, language ' +
       'HAVING MIN(date) <> MAX(date) ' +
       'ORDER BY userid, timespan DESC, productivity ASC')
+
+    db.run('CREATE VIEW IF NOT EXISTS processedjsstatistics AS ' +
+      'SELECT userid, reponame, commitid,filename,' +
+      'CAST(logical_sloc_after AS REAL)/CAST(physical_sloc_after AS REAL) AS pl_ratio, 100 - 100*(CAST(logical_sloc_after AS REAL)/CAST(physical_sloc_after AS REAL))/(CAST(logical_sloc_before AS REAL)/CAST(physical_sloc_before AS REAL)) AS pl_ratio_change,' +
+      'maintainability_after, 100 - maintainability_before/maintainability_after*100 AS maintainability_change,' +
+      'halstead_difficulty_after, 100 - 100*halstead_difficulty_before/halstead_difficulty_after AS halstead_difficulty_change,'+
+      'halstead_volume_after, 100 - 100*halstead_volume_before/halstead_volume_after AS halstead_volume_change '+
+      'FROM jsstatistics'
+    )
 })
 
 var newUserQuery = 'INSERT OR REPLACE INTO users VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)'
@@ -100,6 +109,7 @@ var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIM
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
 var personalDataQuery = 'SELECT * FROM calculatedmetric WHERE userid = ? ORDER BY linecount DESC'
+var personalJsDataQuery = 'SELECT * FROM processedjsstatistics WHERE userid = ? ORDER BY halstead_difficulty_change DESC'
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -249,7 +259,7 @@ exports.getAllDevelopers = function() {
   return allRows(allDeveloperQuery)
 }
 
-exports.getLandingpageStatistitcs = function() {
+exports.getLandingpageStatistics = function() {
   return allRows(landingpageStatisticsQuery)
 }
 
@@ -259,6 +269,17 @@ exports.getStatistics = function(userid) {
     if (e) d.reject(e)
     else d.resolve(r)
   })
+  return d.promise
+}
+
+exports.getJsStatistics = function(uid) {
+  var d = q.defer()
+
+  db.all(personalJsDataQuery, uid, function(e,r) {
+    if (e) d.reject(e)
+    else d.resolve(r)
+  })
+
   return d.promise
 }
 
