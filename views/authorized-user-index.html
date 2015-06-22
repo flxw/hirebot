@@ -35,8 +35,8 @@
             {% for stat in statistics %}
             <tr>
               <td>{{ stat.language }}</td>
-              <td>{{ stat.timespan}}</td>
-              <td>{{ stat.productivity}}</td>
+              <td>{{ stat.timespan | trimFloat }}</td>
+              <td>{{ stat.productivity | trimFloat }}</td>
               <td>{{ stat.averagecommitsize }}</td>
               <td>{{ stat.linecount }}</td>
             </tr>
