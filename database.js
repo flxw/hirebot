@@ -112,7 +112,7 @@ var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
 var personalDataQuery = 'SELECT * FROM calculatedmetric WHERE userid = ? ORDER BY linecount DESC'
 var personalJsDataQuery = 'SELECT * FROM processedjsstatistics WHERE userid = ? ORDER BY halstead_difficulty_change DESC'
-var languagesQuery = "SELECT DISTINCT language FROM statistics ORDER BY language ASC"
+var languagesQuery = "SELECT DISTINCT language FROM calculatedmetric ORDER BY language ASC"
 
 exports.saveUser = function(user) {
   var deferred = q.defer()
@@ -286,7 +286,7 @@ exports.getJsStatistics = function(uid) {
   return d.promise
 }
 
-exports.getRankingFor = function(languages) {
+exports.getRankingFor = function(languages, minDuration) {
   var d = q.defer()
   var lowerBound = Math.ceil(languages.length / 2)
   var queries = []
@@ -302,13 +302,13 @@ exports.getRankingFor = function(languages) {
 
       for (var j = 0; j < combinations[i].length; ++j) {
         conditions += " '" + combinations[i][j] + "' "
-        conditions += " IN (SELECT language FROM calculatedmetric WHERE userid = u.id) "
+        conditions += " IN (SELECT language FROM calculatedmetric WHERE userid = u.id AND timespan >= 360*" + minDuration + ") "
         if (j !== combinations[i].length - 1) conditions += " AND "
       }
 
       for (var j = 0; j < notCombinations.length; ++j) {
         conditions += " AND NOT '" + notCombinations + "' "
-        conditions += " IN (SELECT language FROM calculatedmetric WHERE userid = u.id) "
+        conditions += " IN (SELECT language FROM calculatedmetric WHERE userid = u.id AND timespan >= 360*" + minDuration + ") "
       }
 
       queries.push({ langs: combinations[i], q: query + conditions })
@@ -333,7 +333,7 @@ exports.getRankingFor = function(languages) {
     }
 
     d.resolve(queries)
-  })
+  }).catch(console.log)
 
   return d.promise
 }

@@ -31,7 +31,8 @@ exports.renderRecruiting = function(req,res) {
 
   if (req.query.criteria) {
     var langs = _.map(JSON.parse(req.query.criteria), 'language')
-    promises.push(database.getRankingFor(langs))
+    var minDuration = _.min(_.map(JSON.parse(req.query.criteria), 'duration')) / 2
+    promises.push(database.getRankingFor(langs, minDuration))
   }
 
   q.all(promises).then(function(results) {

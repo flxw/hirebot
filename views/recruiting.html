@@ -13,10 +13,10 @@
 <body>
 {% include "./_header.html" %}
 
-<div class="container">
+<main class="container">
   <div class="row">
     <div class="col s12">
-      <h5>Search criteria</h5>
+      <h5 class="light">Choose the skills that your candidates should provide at least</h5>
       <div class="col m5">
         <label>Programming language</label>
         <div class="input-field">
@@ -43,17 +43,31 @@
     </div>
   </div>
 
-  <hr>
+  {% if candidateFields %}
+  <div class="row">
+    <hr>
+    <p class="flow-text">
+      The candidates that match your criteria are listed below. They appear ordered
+      by the number of the required skills they can provide and their experience with it.
+      The minimum duration is half the duration that you provided.
+    </p>
+    <hr>
+  </div>
+  {% endif %}
 
   <div class="row">
+
     {% for candidateField in candidateFields %}
+    {% for candidate in candidateField.users %}
+    {% if loop.first %}
     <h5>
       {% for l in candidateField.langs %}
       <i class="material-icons">label_outline</i> {{l}}
       {% endfor %}
     </h5>
     <ul class="collapsible popout" data-collapsible="accordion">
-      {% for candidate in candidateField.users %}
+      {% endif %}
+
       <li class="collection-item">
         <div class="collapsible-header">
           <img src="{{candidate.avatarurl}}" class="circle">
@@ -76,11 +90,11 @@
           </ul>
         </div>
       </li>
-      {% endfor %}
-    </ul>
+    {% if loop.last %} </ul> {% endif %}
+    {% endfor %}
     {% endfor %}
   </div>
-</div>
+</main>
 
 {% include "./_footer.html" %}
 

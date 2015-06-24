@@ -1,13 +1,15 @@
-<nav class="light-blue" role="navigation">
-  <div class="nav-wrapper container"><a href="#" class="brand-logo">HireBot</a>
-    {% if user %}
-    <!--<li><a href=""><i class="mdi-action-search left"></i>Reload GitHub profile</a></li>-->
+<header>
+  <nav class="light-blue" role="navigation">
+    <div class="nav-wrapper container"><a href="/" class="brand-logo">HireBot</a>
+      {% if user %}
+      <!--<li><a href=""><i class="mdi-action-search left"></i>Reload GitHub profile</a></li>-->
 
-    <ul class="right hide-on-med-and-down" style="height:100%">
-      <li><a href="/">General</a></li>
-      <li><a href="/javascript">JavaScript</a></li>
-      <li class="right valign-wrapper" style="height:100%"> {{ user.name }} <img class="responsive-img circle" src="{{ user.avatarurl }}" style="height:80%; margin-left: 1em"></li>
-    </ul>
-    {% endif %}
-  </div>
-</nav>
+      <ul class="right hide-on-med-and-down" style="height:100%">
+        <li><a href="/">General</a></li>
+        <li><a href="/javascript">JavaScript</a></li>
+        <li class="right valign-wrapper" style="height:100%"> {{ user.name }} <img class="responsive-img circle" src="{{ user.avatarurl }}" style="height:80%; margin-left: 1em"></li>
+      </ul>
+      {% endif %}
+    </div>
+  </nav>
+</header>

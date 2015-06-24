@@ -9,67 +9,67 @@
   <link href="/assets/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
 </head>
 <body>
-  {% include "./_header.html" %}
+{% include "./_header.html" %}
 
-  <div class="container">
-    <div class="section">
-      <div class="row">
-        <div class="col s12 m7">
-          <div class="icon-block">
-            <p class="light">We looked at your public repositories, picked out your commits and ran some algorithms
-            over the data that they contained. This is what we found. If this is empty, please notify us.</p>
-          </div>
+<main class="container">
+  <div class="section">
+    <div class="row">
+      <div class="col s12 m7">
+        <div class="icon-block">
+          <p class="light">We looked at your public repositories, picked out your commits and ran some algorithms
+          over the data that they contained. This is what we found. If this is empty, please notify us.</p>
+        </div>
 
-          <table class="centered hoverable">
-            <thead>
-              <tr>
-                <th data-field="language">Language</th>
-                <th data-field="timespan">Measured timespan in days</th>
-                <th data-field="commits-per-day">Average commits per day</th>
-                <th data-field="commitsize">Average lines per commit</th>
-                <th data-field="linecount">Total lines</th>
-              </tr>
-            </thead>
-
-            <tbody id="tbody">
-            {% for stat in statistics %}
+        <table class="centered hoverable">
+          <thead>
             <tr>
-              <td>{{ stat.language }}</td>
-              <td>{{ stat.timespan | trimFloat }}</td>
-              <td>{{ stat.productivity | trimFloat }}</td>
-              <td>{{ stat.averagecommitsize }}</td>
-              <td>{{ stat.linecount }}</td>
+              <th data-field="language">Language</th>
+              <th data-field="timespan">Measured timespan in days</th>
+              <th data-field="commits-per-day">Average commits per day</th>
+              <th data-field="commitsize">Average lines per commit</th>
+              <th data-field="linecount">Total lines</th>
             </tr>
+          </thead>
+
+          <tbody id="tbody">
+          {% for stat in statistics %}
+          <tr>
+            <td>{{ stat.language }}</td>
+            <td>{{ stat.timespan | trimFloat }}</td>
+            <td>{{ stat.productivity | trimFloat }}</td>
+            <td>{{ stat.averagecommitsize }}</td>
+            <td>{{ stat.linecount }}</td>
+          </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+
+      </div>
+
+      <div class="col s12 m4">
+        <div class="icon-block">
+          <h1 class="center light-blue-text"><i class="mdi-editor-insert-chart"></i></h1>
+          <h5 class="center light">JavaScript details available!</h5>
+
+          <p class="light">
+            We now provide McCabe, maintainability and Halstead complexity measures
+            specifically for JavaScript! Just click on the menu entry on the header bar.
+          </p>
+        </div>
+        <br>
+        <ul id="repo-collection" class="collection with-header">
+          <li class="collection-header">
+            <h5>Tracked repositories</h5>
+            {% for repo in repositories %}
+            <li class="repo collection-item"><a href="{{user.profileurl}}/{{repo.name}}">{{repo.name}}</a></li>
             {% endfor %}
-            </tbody>
-          </table>
-
-        </div>
-
-        <div class="col s12 m4">
-          <div class="icon-block">
-            <h1 class="center light-blue-text"><i class="mdi-editor-insert-chart"></i></h1>
-            <h5 class="center light">JavaScript details available!</h5>
-
-            <p class="light">
-              We now provide McCabe, maintainability and Halstead complexity measures
-              specifically for JavaScript! Just click on the menu entry on the header bar.
-            </p>
-          </div>
-          <br>
-          <ul id="repo-collection" class="collection with-header">
-            <li class="collection-header">
-              <h5>Tracked repositories</h5>
-              {% for repo in repositories %}
-              <li class="repo collection-item"><a href="{{user.profileurl}}/{{repo.name}}">{{repo.name}}</a></li>
-              {% endfor %}
-            </li>
-          </ul>
-        </div>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
+</main>
 
-  {% include "./_footer.html" %}
+{% include "./_footer.html" %}
 </body>
 </html>
