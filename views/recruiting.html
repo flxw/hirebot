@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hire|Bot</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no"/>
+
+  <!-- CSS  -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.0/css/materialize.min.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="/assets/css/style.css" type="text/css" rel="stylesheet" media="screen,projection"/>
+</head>
+<body>
+{% include "./_header.html" %}
+
+<main class="container">
+  <div class="row">
+    <div class="col s12">
+      <h5 class="light">Choose the skills that your candidates should provide at least</h5>
+      <div class="col m5">
+        <label>Programming language</label>
+        <div class="input-field">
+          <select id="programmingLanguageSelect">
+            {% for language in languages %}
+            <option value="1">{{language.language}}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <label>Experience in years</label>
+        <div class="input-field">
+          <p class="range-field">
+            <input type="range" id="experienceSlider" min="0" max="10" step="0.1"/>
+          </p>
+        </div>
+        <a id="addCriteriaButton" class="waves-effect waves-light btn"><i class="material-icons right">add</i>add</a>
+        <a id="refreshMatchesButton" class="waves-effect waves-light btn"><i class="material-icons right">search</i>Match</a>
+      </div>
+      <div class="col m7">
+        <ul id="criteriaCollection" class="collection">
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  {% if candidateFields %}
+  <div class="row">
+    <hr>
+    <p class="flow-text">
+      The candidates that match your criteria are listed below. They appear ordered
+      by the number of the required skills they can provide and their experience with it.
+      The minimum duration is half the duration that you provided.
+    </p>
+    <hr>
+  </div>
+  {% endif %}
+
+  <div class="row">
+
+    {% for candidateField in candidateFields %}
+    {% for candidate in candidateField.users %}
+    {% if loop.first %}
+    <h5>
+      {% for l in candidateField.langs %}
+      <i class="material-icons">label_outline</i> {{l}}
+      {% endfor %}
+    </h5>
+    <ul class="collapsible popout" data-collapsible="accordion">
+      {% endif %}
+
+      <li class="collection-item">
+        <div class="collapsible-header">
+          <img src="{{candidate.avatarurl}}" class="circle">
+          {% if candidate.name !== "" %} <span class="title">{{ candidate.name }}</span>
+          {% else %} <span class="title">Anonymous</span>{% endif %}
+          <span class="title light">{{ candidate.profilename }}</span>
+        </div>
+        <div class="collapsible-body">
+          <p>
+          {% if candidate.location !== "" %} {{ candidate.location }} | {% endif %}
+          {% if candidate.hireable %} Available for hire | {% endif %}
+          {{candidate.followers}} followers | following {{candidate.following}} | <a href="{{candidate.profileurl}}">View profile <i class="material-icons">call_made</i> </a>
+          </p>
+
+          <ul class="collection">
+            <li class="collection-item active center">Complete skillset</li>
+            {% for skill in candidate.skills %}
+            <li class="collection-item">{{skill.language}} | {{ skill.timespan | trimFloat }} years | last commit on {{ skill.lastcommitdate }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </li>
+    {% if loop.last %} </ul> {% endif %}
+    {% endfor %}
+    {% endfor %}
+  </div>
+</main>
+
+{% include "./_footer.html" %}
+
+<script type="text/javascript">
+  var criteria = []
+
+  function handleAddEvent() {
+    // handle add click event
+    var language = $("#programmingLanguageSelect option:selected").text()
+    var sliderValue = $("#experienceSlider").val()
+
+    for (var i = 0; i < criteria.length; ++i) {
+      if (criteria[i].language === language) return
+    }
+
+    criteria.push({ language: language, duration: sliderValue })
+    addCriteria(language, sliderValue)
+  }
+
+  function addCriteria(lang, duration) {
+    // add a single row to table
+    var html = '<li class="collection-item" data-lang="' + lang + '">' + duration + ' years of ' + lang + '<a href="#" class="secondary-content remove-entry">REMOVE ENTRY</a></li>'
+    $("#criteriaCollection").append(html)
+
+    $(".remove-entry").off("click")
+    $(".remove-entry").on("click", removeCriteria)
+  }
+
+  function removeCriteria(e) {
+    var removedLang = $(e.target.parentElement).data("lang")
+
+    for (var i = 0; i < criteria.length; ++i) {
+      if (criteria[i].language === removedLang) {
+        criteria.splice(i,1)
+        break
+      }
+    }
+
+    e.target.parentElement.parentElement.removeChild(e.target.parentElement)
+  }
+
+  function refreshCandidates() {
+    var u = "/recruit?criteria=" + encodeURIComponent(JSON.stringify(criteria))
+    location.href = u
+  }
+
+  function getParameterByName(name) {
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    var regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+  }
+
+  $(document).ready(function() {
+    $("#addCriteriaButton").click(handleAddEvent)
+    $("#refreshMatchesButton").click(refreshCandidates)
+    $(".remove-entry").on("click", removeCriteria)
+    $("select").material_select()
+
+    // parse url parameters
+    var criteriaParameter = getParameterByName("criteria")
+
+    if (criteriaParameter) {
+      criteria = JSON.parse(criteriaParameter)
+
+      for (var i = 0; i < criteria.length; ++i) {
+        addCriteria(criteria[i].language, criteria[i].duration)
+      }
+    }
+  })
+</script>
+</body>
+</html>

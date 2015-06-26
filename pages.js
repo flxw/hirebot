@@ -3,6 +3,7 @@
 var database = require('./database.js')
 var logger = require('winston')
 var q = require('q')
+var _ = require('lodash')
 
 exports.renderIndex = function(req, res) {
   if (req.isAuthenticated()) {
@@ -18,7 +19,38 @@ exports.renderIndex = function(req, res) {
 
 exports.renderJsStatistics = function(req,res) {
   database.getJsStatistics(req.user.id)
-    .then(function(data) { debugger; res.render('javascript', { user:req.user, statistics: data }) })
+    .then(function(data) {
+      res.render('javascript', { user:req.user, statistics: data })
+    })
+}
+
+exports.renderRecruiting = function(req,res) {
+  var promises = [
+    database.getLanguages()
+  ]
+
+  if (req.query.criteria) {
+    var langs = _.map(JSON.parse(req.query.criteria), 'language')
+    var minDuration = _.min(_.map(JSON.parse(req.query.criteria), 'duration')) / 2
+    promises.push(database.getRankingFor(langs, minDuration))
+  }
+
+  q.all(promises).then(function(results) {
+    if (results[1]) {
+      results[1].forEach(function(cf) {
+        cf.users.forEach(function(c) {
+          c.skills.forEach(function(s) {
+            s.timespan = s.timespan / 360
+          })
+        })
+      })
+    }
+
+    res.render("recruiting", {
+      languages: results[0],
+      candidateFields: results[1]
+    })
+  })
 }
 
 function renderLandingpage(res) {
@@ -45,8 +77,4 @@ function renderUserpage(req,res) {
       statistics: promises[1]
     })
   })
-}
-
-function renderRecruiterPage(req,res) {
-
 }
