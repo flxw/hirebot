@@ -107,7 +107,7 @@ var setLastAnalyzedCommit  = 'UPDATE repositories SET last_analyzed_commit = ?, 
 var addExperienceQuery = 'INSERT INTO statistics VALUES(?,?,?,?,?,?)'
 var addJsStatisticsQuery = 'INSERT INTO jsstatistics VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)'
 var mailQuery = 'SELECT email FROM useremails WHERE userid = ?'
-var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 360'
+var analysisRepoQuery = 'SELECT * FROM repositories WHERE (julianday(CURRENT_TIMESTAMP) - julianday(lastcheck))*86400.0 > 720'
 var allDeveloperQuery = 'SELECT * FROM users WHERE is_recruiter = 0'
 var landingpageStatisticsQuery = 'SELECT COUNT(DISTINCT commitid) AS commitcount, COUNT(DISTINCT language) AS languagecount, julianday() - julianday(MIN(date)) AS daycount FROM statistics'
 var personalDataQuery = 'SELECT * FROM calculatedmetric WHERE userid = ? ORDER BY linecount DESC'
